@@ -1,0 +1,23 @@
+# Secrets and local env
+.env
+
+# Virtual environments
+.venv/
+
+# Python-generated files
+__pycache__/
+*.py[cod]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Test and tool caches
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Scratch notes that are not phase QA reports
+reports/scratch/
+
+.DS_Store
