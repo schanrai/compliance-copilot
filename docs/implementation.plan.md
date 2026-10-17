@@ -1,7 +1,7 @@
 # Compliance Co-pilot — Prototype Implementation Plan
 
-**Date:** 2026-10-15
-**Demo:** Tuesday 20 October 2026, 5pm
+**Date:** 2026-10-15. Calendar revised 2026-10-17.
+**Demo:** Monday 19 October 2026, 5pm
 **Specification:** `compliance-copilot-prd-v4.md` (frozen). Rationale for scope choices: `compliance-copilot-build-plan.md`.
 **This plan supersedes the build plan's §1.5 sequence for the prototype.** The build plan remains the record of *why*; this is the record of *what, in what order, and how we know each step works*.
 
@@ -11,7 +11,7 @@
 
 ## 1. Locked scope
 
-**Available time:** 28 hours — Friday 8h, Sunday 8h, Monday 8h, Tuesday 4h. Saturday is not a working day.
+**Available time:** 21 hours from Saturday — Saturday 8h, Sunday 5h, Monday 8h ending at the 5pm demo. Friday's Phase 0a is done. Sunday afternoon is off. Monday's 8 hours assumes a 9am start; a later start cuts Phase 6 first, then Phase 5.
 
 ### In
 
@@ -29,11 +29,11 @@
 
 ### Out — shown in the demo as *not assessed* or "next"
 
-HBNR · Washington MHMDA · FTC §5 · CT, NV, TX/NE · SOC 2 · PCI · full Security Rule corpus · component 5 · interactive intake (fact patterns are fixtures) · UI · database.
+HBNR · Washington MHMDA · FTC §5 · CT, NV, TX/NE · SOC 2 · PCI · full Security Rule corpus · component 5 · interactive intake (golden-set cases are fixtures) · UI · database.
 
-### Stretch — Monday evening only, if on schedule
+### Stretch — not in this demo
 
-**Claude writes the cited user story** in place of the template, behind the same function (§6). **The model is not chosen yet** — that is the first task of the stretch phase.
+**Claude writes the cited user story** in place of the template, behind the same function (Phase S). There is no Monday evening. The template ships. The model stays unchosen.
 
 ---
 
@@ -43,21 +43,23 @@ HBNR · Washington MHMDA · FTC §5 · CT, NV, TX/NE · SOC 2 · PCI · full Sec
 2. **Template first, Claude as stretch.** The validators, trace and rendering must work with no model in the loop. The model call slots in behind the same interface.
 3. **Corpus is the demo clauses only**, not the full Security Rule (§4 Phase 1).
 4. **HBNR and Washington cut** from the prototype. The wellness app's *not covered* result shows HIPAA out of scope with its reasons and everything else *not assessed*. Diagram Example B is shown on the diagram, not run live.
-5. **Fact patterns are fixtures**, not an interactive intake. Named runs from the command line.
+5. **Golden-set cases are fixtures**, not an interactive intake. Named runs from the command line.
 6. **Rendering is built per phase**, not at the end. Each phase's QA gate includes "it prints readably."
-7. **Nothing new on Tuesday.** Fix what broke, rehearse.
+7. **Nothing new in the last 90 minutes of Monday.** One rehearsal, then the demo. No second rehearsal and no buffer.
 8. **Golden set is time-boxed to 2.5 hours.** The user writes the labels; Claude pressure-tests them.
 
 ---
 
 ## 3. Calendar
 
+Phase G and Phase 0b run **in parallel** on Saturday. You write the golden-set labels. The implementation chat writes the models. Sequential, the same work does not fit before 5pm Monday.
+
 | Day | Hours | Phases | End-of-day checkpoint |
 |---|---|---|---|
-| **Fri 16** | 8 | G (2.5h) · 0 (4.5h) · slack (1h) | Project runs; models validate; pytest loads the golden-set fixtures |
-| **Sun 18** | 8 | 1 (2h) · 2 (1h) · 3 (5h) | **All golden-set determination assertions pass.** If not → Phase 6 is cut on Monday |
-| **Mon 19** | 8 | 4 (3h) · 5 (2h) · 6 (2h) · 7 (1h) · stretch S if ahead | All golden-set tests green |
-| **Tue 20** | 4 | 8 (1h) · rehearsal (1h) · buffer (2h) | Two clean rehearsals. Nothing new built |
+| **Fri 16** | done | 0a | Project installs, pytest passes, dependencies pinned. Models and golden-set cases were not written |
+| **Sat 17** | 8 | G (2.5h, you) alongside 0b–0c (3h). Then 1 (2h), 2 (1h). Start 3 with whatever time is left | Eight fixtures load and validate. Corpus matches eCFR. Operative terms tagged |
+| **Sun 18** | 5 | Finish 3 (5h total, so most of Sunday). Start 4 only after gate 3 passes | **All golden-set determination assertions pass.** If not → Phase 6 is cut, and Monday is 4, 5, 7, and the rehearsal |
+| **Mon 19** | 8, stop 5pm | Finish 4 · 5 (2h) · 7 (1h) · 8 plus one rehearsal (2h). Phase 6 (2h) only if 4 and 5 are done by early afternoon | One clean rehearsal. Demo at 5pm. Nothing new in the last 90 minutes |
 
 ---
 
@@ -69,7 +71,7 @@ Each phase ends at a **QA gate**: named checks that must pass before the next ph
 
 **Goal:** the ground truth every later gate tests against.
 
-**The user writes the fact patterns and expected labels; Claude pressure-tests them.** The labels are a healthcare judgement.
+**The user writes the golden-set cases and expected labels; Claude pressure-tests them.** The labels are a healthcare judgement.
 
 **Slots.** The scenario sketches below come from decisions already made; the expected outcomes are drafts to confirm or correct in this session.
 
@@ -88,7 +90,7 @@ Each phase ends at a **QA gate**: named checks that must pass before the next ph
 
 **Ambiguous cases also assert:** components 1, 2, 3, 4 and 6 present; component 5 absent and labelled as next.
 
-**Deferred:** the differential eval pair (PRD §10 layer 4) needs a one-word corpus variant — post-prototype.
+**Deferred:** the differential eval pair (PRD §10 layer 4) needs a one-word corpus variant. Scheduled as build plan §5 item 8, with the Module 10 golden-set work.
 
 **Fixture format — one YAML file per case** in `tests/golden/cases/`:
 
@@ -145,14 +147,14 @@ compliance-copilot/
 │   │   ├── loader.py         # get_clauses(framework, scope_filter)
 │   │   ├── data/             # clause JSON per framework
 │   │   ├── lexicon.yaml      # broadening lexicon
-│   │   └── patterns.yaml     # derivation pattern library (one entry)
+│   │   └── implications.yaml # list of implications (one entry)
 │   ├── router/               # covered-entity rules, framework summary
 │   ├── output/               # ambiguous output builder
 │   ├── specialists/          # HIPAA requirement producer (template → model)
-│   ├── amender/              # pattern match → derived requirement
+│   ├── amender/              # implication match → derived requirement
 │   ├── trace/                # append-only trace writer
 │   ├── render/               # terminal rendering
-│   └── cli.py                # `run <fact-pattern>`
+│   └── cli.py                # `run <case>`
 └── tests/
     ├── golden/cases/         # G-01 … G-08 YAML
     ├── golden/test_golden.py # parametrised over the cases
@@ -178,8 +180,8 @@ compliance-copilot/
 
 - `Field` wrapper: `value`, `source`, `state` — `unknown_to_user` is a first-class state (PRD §7.1)
 - `ComplianceContextObject` — **only the parts the determination reads**: `hipaa_situation` (including `customers_bill_insurers_electronically` and the subcontractor customer type), the product description, and the `derived` block. Not the full schema
-- `Clause` — PRD §15.1, including `clause_type`, `modality`, `operative_terms`, `derivation_patterns`
-- `Requirement` — PRD §8.6, with **checks 1–4 and 6 as Pydantic validators**, so an invalid requirement cannot be constructed. Check 5 (scope) arrives in Phase 2
+- `Clause` — PRD §15.1, including `clause_type`, `modality`, `operative_terms`, `implications`
+- `Requirement` — PRD §8.6, with **checks 1–4 and 6 as Pydantic validators**, so an invalid requirement cannot be constructed. Check 5 (scope) arrives in Phase 2. `timing` is `applies_now` or `design_triggered` only (PRD §8.2). Every prototype requirement is `applies_now`. Do not branch on `design_triggered`, and do not add `applies_at_scale`
 - `TraceStep` / `Trace` — PRD §13.1, with the §13.2 action enum. Append-only
 - `Determination` and `FrameworkSummaryEntry`
 
@@ -193,12 +195,12 @@ compliance-copilot/
 - [ ] Fresh clone → `uv sync` → `pytest` passes
 - [ ] `pip-audit` clean; every version pinned exactly
 - [ ] All 8 golden cases load and validate against the models
-- [ ] Unit tests: a cited requirement with `modality: required` on a `standard` is **rejected**; a derived requirement missing `pattern_id` is **rejected**; a requirement with no `evidence_type` is **rejected**
+- [ ] Unit tests: a cited requirement with `modality: required` on a `standard` is **rejected**; a derived requirement missing `implication_id` is **rejected**; a requirement with no `evidence_type` is **rejected**
 - [ ] No hard-coded paths or keys; config comes from env
 
 ---
 
-### Phase 1 — Corpus (Sun, 2h)
+### Phase 1 — Corpus (Sat, 2h)
 
 **Goal:** the clauses the demo touches, stored as `Clause` JSON behind `get_clauses()`.
 
@@ -226,15 +228,16 @@ compliance-copilot/
 
 ---
 
-### Phase 2 — Operative terms and lexicon (Sun, 1h)
+### Phase 2 — Operative terms and lexicon (Sat, 1h)
 
 **Goal:** trigger-fidelity data, and §8.6 check 5.
 
 **Tasks**
-1. Tag `operative_terms` on every clause by hand (PRD §15.1)
+1. Tag `operative_terms` on every clause by hand, following PRD §15.1. Copy phrases verbatim. Include a phrase only when dropping it or widening it would change the obligation. Leave out means the clause leaves open. Use the same test on the 160.103 definitions and on 164.306(c) and (d). A close call is copied and noted, then resolved after the sitting
 2. Write `lexicon.yaml` from the recurring vocabulary — ePHI ⊂ PHI ⊂ health information, and the rest (PRD §15.2)
 3. Add check 5 (scope) to the `Requirement` validator
-4. Tag `derivation_patterns` on 164.404(b) and 164.410(b) — Option A, tag at ingestion (PRD §8.7)
+4. Tag `implications` on 164.404(b) and 164.410(b). **Provisional:** the prototype uses Option A only to attach the one implication Phase 6 needs. The matching decision stays open (PRD §8.7)
+5. While tagging, note every clause that looks like it implies engineering it never states, and the implication it suggests. Do not write new entries yet. The notes are evidence for two open decisions: how implications are matched (PRD §8.7) and how the list grows (PRD §17.11)
 
 **QA gate 2**
 - [ ] *"implement comprehensive audit logging for all health data"* citing 164.312(b) is **rejected** (the PRD §8.6 example)
@@ -242,7 +245,7 @@ compliance-copilot/
 
 ---
 
-### Phase 3 — Covered-entity determination (Sun, 5h)
+### Phase 3 — Covered-entity determination (Sat–Sun, 5h)
 
 **Goal:** the branch the reviewer will probe hardest. Plain Python, no model.
 
@@ -265,7 +268,7 @@ compliance-copilot/
 
 ---
 
-### Phase 4 — Routing, framework summary, ambiguous output (Mon, 3h)
+### Phase 4 — Routing, framework summary, ambiguous output (Sun–Mon, 3h)
 
 **Goal:** what the founder sees at Gate 2.
 
@@ -282,7 +285,7 @@ compliance-copilot/
 
 ---
 
-### Phase 5 — Cited requirement, template (Mon, 2h)
+### Phase 5 — Cited requirement, template (Mon, 2h). Next cut after Phase 6 if Monday starts after 9am.
 
 **Goal:** one cited requirement out of the HIPAA branch, with its trace.
 
@@ -298,20 +301,20 @@ compliance-copilot/
 
 ---
 
-### Phase 6 — Derived requirement (Mon, 2h)
+### Phase 6 — Derived requirement (Mon, 2h, only if gates 3, 4 and 5 have passed by early afternoon)
 
 **Goal:** demo moment 2 — the requirement that appears nowhere in the regulation.
 
 **Tasks**
-1. Load `notification_deadline_implies_identification` from `patterns.yaml`
+1. Load `notification_deadline_implies_identification` from `implications.yaml`
 2. Look up which clause carries the tag for the determination: covered entity → 164.404(b); business associate → 164.410(b) (risk R2)
-3. Produce the derived requirement: `evidence_type: derived`, `citation`, `rationale`, `derived_from`, `pattern_id`; no modality
-4. Amender trace steps (`classified_output_type`, `derived_via_pattern`)
+3. Produce the derived requirement: `evidence_type: derived`, `citation`, `rationale`, `derived_from`, `implication_id`; no modality
+4. Amender trace steps (`classified_output_type`, `derived_via_implication`)
 5. Render with the *Derived — not stated in the regulation* marker and the full source clause
 
 **QA gate 6**
 - [ ] Derived requirement present on the in-scope cases, absent elsewhere
-- [ ] Validators reject it if `pattern_id` or `rationale` is removed
+- [ ] Validators reject it if `implication_id` or `rationale` is removed
 - [ ] Derived count ≤ cited count (PRD §10.1)
 
 ---
@@ -330,7 +333,9 @@ compliance-copilot/
 
 ---
 
-### Phase S — Stretch: Claude writes the cited user story (Mon evening, only if Gate 7 passed with time left)
+### Phase S — Stretch: not in this demo
+
+There is no Monday evening. The cited requirement ships from the template. Phase S moves to after the demo, with the model still unchosen.
 
 **Tasks**
 1. **Choose the model.** Check the current Claude model line-up, pricing and structured-output support at the time (use the `claude-api` reference, not memory). Not decided now
@@ -342,19 +347,19 @@ compliance-copilot/
 **QA gate S**
 - [ ] Golden tests still all green with the model on
 - [ ] Forced failure falls back to the template cleanly
-- [ ] **If not green by end of Monday → the template ships.** Nothing model-related on Tuesday
+- [ ] Deferred. Do not start this phase before the demo. The template ships on Monday
 
 ---
 
-### Phase 8 — Demo commands (Tue, 1h)
+### Phase 8 — Demo commands (Mon, before 5pm, 1h plus one rehearsal)
 
 **Tasks**
-1. `run <case>` for the named patterns — at least `records-platform` (G-01), `wellness-app` (G-02), `scheduling-tool` (G-04)
+1. `run <case>` for the named golden-set cases — at least `records-platform` (G-01), `wellness-app` (G-02), `scheduling-tool` (G-04)
 2. The flip as its own command (`run wellness-app --contracts-with-clinic`, or G-03 as a named run). No live file edits
 3. A demo script: order of runs, what to say at each, where the *not assessed* list makes the honesty point
 
 **QA gate 8**
-- [ ] Two full rehearsals, start to finish, including the live `pytest` run, with no edits between them
+- [ ] One rehearsal, start to finish, including the live `pytest` run, with no edits during it. It happens in the last 90 minutes before 5pm
 
 ---
 
@@ -366,7 +371,7 @@ compliance-copilot/
 | R2 | **The derived example's clause depends on the branch.** 164.404(b) is a *covered entity's* deadline to notify individuals. A *business associate* notifies the covered entity under **164.410** — believed (b) timeliness, (c) content including identification of each affected individual. Unverified | Verify 164.410 in Phase 1. If it reads as believed, it is a *better* source for the BA case. Log PRD §8.6 / §11.3 (which use 164.404(b) on a clinic-vendor scenario) in PRD §21 |
 | R3 | Phase 3 overruns — it is the hardest logic | Sunday checkpoint cuts Phase 6. Golden set written first makes "done" unambiguous |
 | R4 | Golden-set session overruns | Hard 2.5h stop. Unlabelled cases are dropped, not rushed |
-| R5 | Production-quality standards vs a 28h budget | Quality applies to what is built; scope is what flexes. No shortcuts inside a phase |
+| R5 | Production-quality standards vs a 21h budget | Quality applies to what is built; scope is what flexes. Phase 6, then Phase 5. No shortcuts inside a phase |
 
 ---
 
