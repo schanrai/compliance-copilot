@@ -35,11 +35,12 @@ uv run pytest
 
 ## Run
 
-The demo command arrives in Phase 8. The corpus commands work now:
+The demo command arrives in Phase 8. The corpus commands work now, and Phase 3 prints a covered-entity determination:
 
 ```bash
 uv run python -m compliance_copilot.cli clause 45-CFR-164.312-b   # one clause, full text and modality line
 uv run python -m compliance_copilot.cli clauses HIPAA             # everything get_clauses returns for HIPAA
+uv run python -m compliance_copilot.cli determine tests/golden/cases/g-01.yaml   # covered-entity determination
 uv run python -m compliance_copilot.cli ingest-corpus --on 2026-10-15   # refetch from the eCFR API (network)
 ```
 

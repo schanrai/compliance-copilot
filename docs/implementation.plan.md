@@ -262,11 +262,23 @@ Gate 1 passed 2026-10-17 — `reports/phase-1_qa.md`. R2 verified as believed.
 5. Render the determination and its reasoning readably
 
 **QA gate 3 — the critical checkpoint**
-- [ ] Every golden case's `covered_entity_status`, `ambiguity_cause` and `derived_from` match
-- [ ] G-02 → G-03: one founder answer changed (four intake fields); determination flips from neither to business associate
-- [ ] G-06 is a business associate with `customers_bill_insurers_electronically` not asked
-- [ ] Unit tests cover each rule branch, including `skipped` vs `not_asked` vs `unknown_to_user`
-- [ ] **If this gate fails at end of Sunday → Phase 6 is cut on Monday**
+- [x] Every golden case's `covered_entity_status`, `ambiguity_cause` and `derived_from` match
+- [x] G-02 → G-03: one founder answer changed (four intake fields); determination flips from neither to business associate
+- [x] G-06 is a business associate with `customers_bill_insurers_electronically` not asked
+- [x] Unit tests cover each rule branch, including `skipped` vs `not_asked` vs `unknown_to_user`
+- [x] Gate passed 2026-10-18 — `reports/phase-3_qa.md`. Phase 6 is not cut
+
+**Decisions made while building (2026-10-18).** The reading of `receives_clinical_information`, including `not_asked`, was left to this phase (PRD §20, 2026-10-17).
+
+1. **Clinical information.** Read only after a covered-entity customer and received patient data are both established. Yes is cited. No is `contested_question` (scheduling details only). `not_asked` does not block, which is why G-03 and G-06 are business associates without the field. `skipped` and `unknown_to_user` are `missing_fact`, and they are not read as no.
+2. **Signed agreements are not read.** A signed agreement does not decide status. The render says so when the intake recorded an answer.
+3. **One no rules out the founder's own covered-entity status.** Both `provides_care_directly` and `bills_insurers_electronically` must be yes. Billing alone is not enough. The false fields are the ones cited. Both `not_asked` means that branch was not considered.
+4. **The founder's own covered-entity status wins** when it applies. A settled business-associate result is not downgraded by an open question on the other branch: a determined result cannot carry an unresolved question.
+5. **Cause order, when more than one is present:** `missing_fact`, then `requires_document_we_cannot_see`, then `contested_question`. Unknown clinic billing therefore wins over scheduling-only data.
+6. **Health-plan customers do not read the clinic-billing field**, whatever state that field is in. A health plan also settles the customer side when clinic billing is open.
+7. **A subcontractor customer is `requires_document_we_cannot_see` only when no customer is a settled covered entity.** A settled covered entity in the same list is a business associate. Not receiving patient data rules the business-associate branch out before billing or the contract question is reached.
+8. **Employers are not covered entities,** and they are not read as group health plans. Clearinghouses, and a founder who is themselves a health plan, are not in the intake.
+9. **Billing through a billing company is not a router rule.** The unresolved question uses the intake wording: "either directly or through a billing company."
 
 ---
 

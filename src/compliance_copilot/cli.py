@@ -5,7 +5,9 @@ Run with `uv run python -m compliance_copilot.cli <command>`.
 
 from __future__ import annotations
 
+import sys
 from datetime import date, datetime
+from pathlib import Path
 from typing import Annotated
 
 import typer
@@ -15,9 +17,12 @@ from compliance_copilot.config import load_settings
 from compliance_copilot.corpus.ingest import ingest_corpus
 from compliance_copilot.corpus.loader import ClauseNotFoundError, default_corpus
 from compliance_copilot.corpus.models import ScopeFilter
+from compliance_copilot.golden.loader import GoldenCaseError, load_golden_case
 from compliance_copilot.log import configure_logging
 from compliance_copilot.models import Framework
 from compliance_copilot.render.clause import clause_panel
+from compliance_copilot.render.determination import determination_panel
+from compliance_copilot.router import RunError, run_determination
 
 app = typer.Typer(no_args_is_help=True, add_completion=False)
 console = Console()
@@ -54,6 +59,23 @@ def clauses(
     for found in result.clauses:
         console.print(clause_panel(found))
     console.print(f"{len(result.clauses)} clauses for {framework.value}")
+
+
+@app.command()
+def determine(
+    case: Annotated[Path, typer.Argument(help="Path to one golden-set YAML case")],
+) -> None:
+    """Print the covered-entity determination for a golden-set case."""
+
+    out = Console(file=sys.stdout)
+    try:
+        loaded = load_golden_case(case)
+        run = run_determination(loaded.stated, analysis_id=loaded.id)
+    except (GoldenCaseError, RunError) as exc:
+        out.print(f"[red]{exc}[/red]")
+        raise typer.Exit(code=1) from exc
+    out.print(determination_panel(loaded.stated, run))
+    out.print(f"{loaded.id}: {run.decision.determination.value.value}")
 
 
 @app.command("ingest-corpus")
