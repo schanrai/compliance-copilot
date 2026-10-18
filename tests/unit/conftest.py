@@ -5,6 +5,7 @@ from __future__ import annotations
 import pytest
 from factories import IMPLICATION_ID, cited_fields, make_clauses, make_declarations
 
+from compliance_copilot.corpus.lexicon import load_lexicon
 from compliance_copilot.models import Requirement, RequirementContext
 
 
@@ -14,6 +15,7 @@ def context() -> RequirementContext:
         clauses=make_clauses(),
         declarations=make_declarations(),
         implication_ids=[IMPLICATION_ID],
+        lexicon=load_lexicon(),
     )
 
 

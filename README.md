@@ -35,4 +35,12 @@ uv run pytest
 
 ## Run
 
-There is no demo command yet. Phase 8 adds `run <fact-pattern>`.
+The demo command arrives in Phase 8. The corpus commands work now:
+
+```bash
+uv run python -m compliance_copilot.cli clause 45-CFR-164.312-b   # one clause, full text and modality line
+uv run python -m compliance_copilot.cli clauses HIPAA             # everything get_clauses returns for HIPAA
+uv run python -m compliance_copilot.cli ingest-corpus --on 2026-10-15   # refetch from the eCFR API (network)
+```
+
+The corpus is `src/compliance_copilot/corpus/data/*.json`, generated from `corpus/sources.yaml`. Do not edit the JSON by hand: a test rebuilds it from the saved eCFR responses and fails on any difference.

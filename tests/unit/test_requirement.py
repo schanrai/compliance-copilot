@@ -1,4 +1,4 @@
-"""PRD §8.6 checks 1–4 and 6, enforced when a Requirement is built."""
+"""PRD §8.6 checks 1–6, enforced when a Requirement is built."""
 
 from __future__ import annotations
 
@@ -13,6 +13,8 @@ from factories import (
 )
 from pydantic import ValidationError
 
+from compliance_copilot.corpus.lexicon import load_lexicon
+from compliance_copilot.corpus.loader import default_corpus
 from compliance_copilot.models import (
     ClauseType,
     EvidenceType,
@@ -55,6 +57,43 @@ def test_gate0_requirement_with_no_evidence_type_is_rejected(
         Requirement.model_validate(fields, context=context)
     errors = excinfo.value.errors()
     assert [(e["loc"], e["type"]) for e in errors] == [(("evidence_type",), "missing")]
+
+
+# --- QA gate 2: check 5, scope ---------------------------------------------
+
+HEALTH_DATA_SENTENCE = "implement comprehensive audit logging for all health data"
+INSIDE_AUDIT_CONTROLS = (
+    "Record and examine activity in information systems that contain or use "
+    "electronic protected health information."
+)
+
+
+def _shipped_context() -> RequirementContext:
+    corpus = default_corpus()
+    return RequirementContext.build(
+        clauses=corpus.clauses,
+        declarations=corpus.declarations,
+        lexicon=load_lexicon(),
+    )
+
+
+def test_gate2_health_data_citing_audit_controls_is_rejected() -> None:
+    fields = cited_fields(text=HEALTH_DATA_SENTENCE)
+
+    with pytest.raises(ValidationError, match="health data") as excinfo:
+        Requirement.model_validate(fields, context=_shipped_context())
+    message = str(excinfo.value)
+    assert "check 5" in message
+    assert "electronic protected health information" in message
+
+
+def test_gate2_wording_inside_audit_controls_terms_is_accepted() -> None:
+    fields = cited_fields(text=INSIDE_AUDIT_CONTROLS)
+
+    requirement = Requirement.model_validate(fields, context=_shipped_context())
+
+    assert requirement.citation == AUDIT_CONTROLS_ID
+    assert requirement.text == INSIDE_AUDIT_CONTROLS
 
 
 # --- valid requirements are accepted ---------------------------------------
@@ -282,5 +321,7 @@ def test_duplicate_clause_ids_in_a_context_are_rejected(
 
     with pytest.raises(ValueError, match="duplicate clause id"):
         RequirementContext.build(
-            clauses=[clause, clause], declarations=context.declarations.values()
+            clauses=[clause, clause],
+            declarations=context.declarations.values(),
+            lexicon=context.lexicon,
         )

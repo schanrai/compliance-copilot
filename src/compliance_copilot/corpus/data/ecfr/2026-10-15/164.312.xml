@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<DIV8 N="164.312" TYPE="SECTION" hierarchy_metadata="{&quot;path&quot;:&quot;/on/_SUBSTITUTE_DATE_/title-45/section-164.312&quot;,&quot;citation&quot;:&quot;45 CFR 164.312&quot;}">
+<HEAD>§ 164.312 Technical safeguards.</HEAD>
+<P>A covered entity or business associate must, in accordance with § 164.306:</P>
+<P>(a)(1) <I>Standard: Access control.</I> Implement technical policies and procedures for electronic information systems that maintain electronic protected health information to allow access only to those persons or software programs that have been granted access rights as specified in § 164.308(a)(4).</P>
+<P>(2) <I>Implementation specifications:</I></P>
+<P>(i) <I>Unique user identification (Required).</I> Assign a unique name and/or number for identifying and tracking user identity.</P>
+<P>(ii) <I>Emergency access procedure (Required).</I> Establish (and implement as needed) procedures for obtaining necessary electronic protected health information during an emergency.</P>
+<P>(iii) <I>Automatic logoff (Addressable).</I> Implement electronic procedures that terminate an electronic session after a predetermined time of inactivity.</P>
+<P>(iv) <I>Encryption and decryption (Addressable).</I> Implement a mechanism to encrypt and decrypt electronic protected health information.</P>
+<P>(b) <I>Standard: Audit controls.</I> Implement hardware, software, and/or procedural mechanisms that record and examine activity in information systems that contain or use electronic protected health information.</P>
+<P>(c)(1) <I>Standard: Integrity.</I> Implement policies and procedures to protect electronic protected health information from improper alteration or destruction.</P>
+<P>(2) <I>Implementation specification: Mechanism to authenticate electronic protected health information (Addressable).</I> Implement electronic mechanisms to corroborate that electronic protected health information has not been altered or destroyed in an unauthorized manner.</P>
+<P>(d) <I>Standard: Person or entity authentication.</I> Implement procedures to verify that a person or entity seeking access to electronic protected health information is the one claimed.</P>
+<P>(e)(1) <I>Standard: Transmission security.</I> Implement technical security measures to guard against unauthorized access to electronic protected health information that is being transmitted over an electronic communications network.</P>
+<P>(2) <I>Implementation specifications:</I></P>
+<P>(i) <I>Integrity controls (Addressable).</I> Implement security measures to ensure that electronically transmitted electronic protected health information is not improperly modified without detection until disposed of.</P>
+<P>(ii) <I>Encryption (Addressable).</I> Implement a mechanism to encrypt electronic protected health information whenever deemed appropriate.</P>
+<CITA TYPE="N">[68 FR 8376, Feb. 20, 2003, as amended at 78 FR 5694, Jan. 25, 2013]
+</CITA>
+</DIV8>

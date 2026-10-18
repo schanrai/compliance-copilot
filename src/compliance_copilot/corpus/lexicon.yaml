@@ -1,1 +1,27 @@
-# Placeholder. The lexicon is written in Phase 2.
+# Broadening lexicon (PRD §15.2).
+# narrower_than is allowed in two cases only: the 160.103 nest
+# (electronic protected health information is the electronic subset of
+# protected health information, and protected health information is
+# individually identifiable health information), and the known widening
+# "health data", which is not a defined HIPAA term.
+# No other hierarchy. No weaker_than. addressable/required is not a link.
+
+terms:
+  - term: electronic protected health information
+    aliases:
+      - ePHI
+      - electronic PHI
+    narrower_than:
+      - protected health information
+
+  - term: protected health information
+    aliases:
+      - PHI
+    narrower_than:
+      - individually identifiable health information
+      - health data
+
+  - term: individually identifiable health information
+
+  - term: health data
+    note: Not a defined HIPAA term. The known widening of protected health information.

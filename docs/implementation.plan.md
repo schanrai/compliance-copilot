@@ -221,10 +221,12 @@ compliance-copilot/
 4. Record `source_url` and `retrieved_at` on every clause
 
 **QA gate 1**
-- [ ] Every clause's text matches eCFR verbatim (spot-check every one — the corpus is small enough)
-- [ ] 164.312(b) is `standard` / `null`; (a)(2)(i) `implementation_specification` / `required`; (a)(2)(iv) `implementation_specification` / `addressable`; 164.404(b) `implementation_specification` / `null`
-- [ ] Every citation in the golden set resolves through `get_clauses`
-- [ ] A clause prints readably with its full text and modality line
+- [x] Every clause's text matches eCFR verbatim (spot-check every one — the corpus is small enough)
+- [x] 164.312(b) is `standard` / `null`; (a)(2)(i) `implementation_specification` / `required`; (a)(2)(iv) `implementation_specification` / `addressable`; 164.404(b) `implementation_specification` / `null`
+- [x] Every citation in the golden set resolves through `get_clauses`
+- [x] A clause prints readably with its full text and modality line
+
+Gate 1 passed 2026-10-17 — `reports/phase-1_qa.md`. R2 verified as believed.
 
 ---
 

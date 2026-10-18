@@ -1,0 +1,84 @@
+{
+  "summary_framework": "HIPAA",
+  "declaration": {
+    "framework": "HIPAA-Breach-Notification",
+    "clause_types": [
+      "implementation_specification",
+      "standard"
+    ],
+    "grades_specifications": false
+  },
+  "clauses": [
+    {
+      "id": "45-CFR-164.404-b",
+      "framework": "HIPAA-Breach-Notification",
+      "text": "Except as provided in § 164.412, a covered entity shall provide the notification required by paragraph (a) of this section without unreasonable delay and in no case later than 60 calendar days after discovery of a breach.",
+      "heading": "Implementation specification: Timeliness of notification",
+      "clause_type": "implementation_specification",
+      "modality": null,
+      "status": "in-force",
+      "jurisdiction": "federal",
+      "operative_terms": [
+        "Except as provided in § 164.412",
+        "a covered entity",
+        "provide the notification required by paragraph (a) of this section",
+        "without unreasonable delay",
+        "60 calendar days",
+        "after discovery of a breach"
+      ],
+      "implications": [
+        "notification_deadline_implies_identification"
+      ],
+      "source_url": "https://www.ecfr.gov/on/2026-10-15/title-45/section-164.404#p-164.404(b)",
+      "retrieved_at": "2026-10-18T01:03:38.677291Z"
+    },
+    {
+      "id": "45-CFR-164.410-b",
+      "framework": "HIPAA-Breach-Notification",
+      "text": "Except as provided in § 164.412, a business associate shall provide the notification required by paragraph (a) of this section without unreasonable delay and in no case later than 60 calendar days after discovery of a breach.",
+      "heading": "Implementation specifications: Timeliness of notification",
+      "clause_type": "implementation_specification",
+      "modality": null,
+      "status": "in-force",
+      "jurisdiction": "federal",
+      "operative_terms": [
+        "Except as provided in § 164.412",
+        "a business associate",
+        "provide the notification required by paragraph (a) of this section",
+        "without unreasonable delay",
+        "60 calendar days",
+        "after discovery of a breach"
+      ],
+      "implications": [
+        "notification_deadline_implies_identification"
+      ],
+      "source_url": "https://www.ecfr.gov/on/2026-10-15/title-45/section-164.410#p-164.410(b)",
+      "retrieved_at": "2026-10-18T01:03:38.733069Z"
+    },
+    {
+      "id": "45-CFR-164.410-c",
+      "framework": "HIPAA-Breach-Notification",
+      "text": "(1) The notification required by paragraph (a) of this section shall include, to the extent possible, the identification of each individual whose unsecured protected health information has been, or is reasonably believed by the business associate to have been, accessed, acquired, used, or disclosed during the breach.\n(2) A business associate shall provide the covered entity with any other available information that the covered entity is required to include in notification to the individual under § 164.404(c) at the time of the notification required by paragraph (a) of this section or promptly thereafter as information becomes available.",
+      "heading": "Implementation specifications: Content of notification",
+      "clause_type": "implementation_specification",
+      "modality": null,
+      "status": "in-force",
+      "jurisdiction": "federal",
+      "operative_terms": [
+        "The notification required by paragraph (a) of this section",
+        "to the extent possible",
+        "the identification of each individual",
+        "unsecured protected health information",
+        "or is reasonably believed by the business associate to have been",
+        "accessed, acquired, used, or disclosed",
+        "during the breach",
+        "provide the covered entity with any other available information",
+        "the covered entity is required to include in notification to the individual under § 164.404(c)",
+        "at the time of the notification required by paragraph (a) of this section or promptly thereafter as information becomes available"
+      ],
+      "implications": [],
+      "source_url": "https://www.ecfr.gov/on/2026-10-15/title-45/section-164.410#p-164.410(c)",
+      "retrieved_at": "2026-10-18T01:03:38.733069Z"
+    }
+  ]
+}

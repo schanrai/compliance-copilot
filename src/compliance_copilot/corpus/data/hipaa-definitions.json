@@ -1,0 +1,176 @@
+{
+  "summary_framework": "HIPAA",
+  "declaration": {
+    "framework": "HIPAA-Definitions",
+    "clause_types": [],
+    "grades_specifications": false
+  },
+  "clauses": [
+    {
+      "id": "45-CFR-160.103-def-business-associate",
+      "framework": "HIPAA-Definitions",
+      "text": "Business associate: (1) Except as provided in paragraph (4) of this definition, business associate means, with respect to a covered entity, a person who:\n(i) On behalf of such covered entity or of an organized health care arrangement (as defined in this section) in which the covered entity participates, but other than in the capacity of a member of the workforce of such covered entity or arrangement, creates, receives, maintains, or transmits protected health information for a function or activity regulated by this subchapter, including claims processing or administration, data analysis, processing or administration, utilization review, quality assurance, patient safety activities listed at 42 CFR 3.20, billing, benefit management, practice management, and repricing; or\n(ii) Provides, other than in the capacity of a member of the workforce of such covered entity, legal, actuarial, accounting, consulting, data aggregation (as defined in § 164.501 of this subchapter), management, administrative, accreditation, or financial services to or for such covered entity, or to or for an organized health care arrangement in which the covered entity participates, where the provision of the service involves the disclosure of protected health information from such covered entity or arrangement, or from another business associate of such covered entity or arrangement, to the person.\n(2) A covered entity may be a business associate of another covered entity.\n(3) Business associate includes:\n(i) A Health Information Organization, E-prescribing Gateway, or other person that provides data transmission services with respect to protected health information to a covered entity and that requires access on a routine basis to such protected health information.\n(ii) A person that offers a personal health record to one or more individuals on behalf of a covered entity.\n(iii) A subcontractor that creates, receives, maintains, or transmits protected health information on behalf of the business associate.\n(4) Business associate does not include:\n(i) A health care provider, with respect to disclosures by a covered entity to the health care provider concerning the treatment of the individual.\n(ii) A plan sponsor, with respect to disclosures by a group health plan (or by a health insurance issuer or HMO with respect to a group health plan) to the plan sponsor, to the extent that the requirements of § 164.504(f) of this subchapter apply and are met.\n(iii) A government agency, with respect to determining eligibility for, or enrollment in, a government health plan that provides public benefits and is administered by another government agency, or collecting protected health information for such purposes, to the extent such activities are authorized by law.\n(iv) A covered entity participating in an organized health care arrangement that performs a function or activity as described by paragraph (1)(i) of this definition for or on behalf of such organized health care arrangement, or that provides a service as described in paragraph (1)(ii) of this definition to or for such organized health care arrangement by virtue of such activities or services.",
+      "heading": "Business associate",
+      "clause_type": null,
+      "modality": null,
+      "status": "in-force",
+      "jurisdiction": "federal",
+      "operative_terms": [
+        "with respect to a covered entity",
+        "On behalf of such covered entity or of an organized health care arrangement",
+        "other than in the capacity of a member of the workforce",
+        "creates, receives, maintains, or transmits",
+        "protected health information",
+        "for a function or activity regulated by this subchapter",
+        "legal, actuarial, accounting, consulting, data aggregation (as defined in § 164.501 of this subchapter), management, administrative, accreditation, or financial services",
+        "involves the disclosure of protected health information from such covered entity or arrangement, or from another business associate of such covered entity or arrangement",
+        "A covered entity may be a business associate of another covered entity",
+        "provides data transmission services with respect to protected health information to a covered entity and that requires access on a routine basis to such protected health information",
+        "offers a personal health record to one or more individuals on behalf of a covered entity",
+        "subcontractor that creates, receives, maintains, or transmits protected health information on behalf of the business associate",
+        "disclosures by a covered entity to the health care provider concerning the treatment of the individual",
+        "plan sponsor, with respect to disclosures by a group health plan (or by a health insurance issuer or HMO with respect to a group health plan) to the plan sponsor, to the extent that the requirements of § 164.504(f) of this subchapter apply and are met",
+        "determining eligibility for, or enrollment in, a government health plan",
+        "to the extent such activities are authorized by law",
+        "by virtue of such activities or services"
+      ],
+      "implications": [],
+      "source_url": "https://www.ecfr.gov/on/2026-10-15/title-45/section-160.103",
+      "retrieved_at": "2026-10-18T01:03:28.676722Z"
+    },
+    {
+      "id": "45-CFR-160.103-def-covered-entity",
+      "framework": "HIPAA-Definitions",
+      "text": "Covered entity means:\n(1) A health plan.\n(2) A health care clearinghouse.\n(3) A health care provider who transmits any health information in electronic form in connection with a transaction covered by this subchapter.",
+      "heading": "Covered entity",
+      "clause_type": null,
+      "modality": null,
+      "status": "in-force",
+      "jurisdiction": "federal",
+      "operative_terms": [
+        "A health plan",
+        "A health care clearinghouse",
+        "A health care provider who transmits any health information in electronic form in connection with a transaction covered by this subchapter"
+      ],
+      "implications": [],
+      "source_url": "https://www.ecfr.gov/on/2026-10-15/title-45/section-160.103",
+      "retrieved_at": "2026-10-18T01:03:28.676722Z"
+    },
+    {
+      "id": "45-CFR-160.103-def-health-care-provider",
+      "framework": "HIPAA-Definitions",
+      "text": "Health care provider means a provider of services (as defined in section 1861(u) of the Act, 42 U.S.C. 1395x(u)), a provider of medical or health services (as defined in section 1861(s) of the Act, 42 U.S.C. 1395x(s)), and any other person or organization who furnishes, bills, or is paid for health care in the normal course of business.",
+      "heading": "Health care provider",
+      "clause_type": null,
+      "modality": null,
+      "status": "in-force",
+      "jurisdiction": "federal",
+      "operative_terms": [
+        "provider of services (as defined in section 1861(u) of the Act, 42 U.S.C. 1395x(u))",
+        "provider of medical or health services (as defined in section 1861(s) of the Act, 42 U.S.C. 1395x(s))",
+        "any other person or organization who furnishes, bills, or is paid for health care in the normal course of business"
+      ],
+      "implications": [],
+      "source_url": "https://www.ecfr.gov/on/2026-10-15/title-45/section-160.103",
+      "retrieved_at": "2026-10-18T01:03:28.676722Z"
+    },
+    {
+      "id": "45-CFR-160.103-def-health-plan",
+      "framework": "HIPAA-Definitions",
+      "text": "Health plan means an individual or group plan that provides, or pays the cost of, medical care (as defined in section 2791(a)(2) of the PHS Act, 42 U.S.C. 300gg-91(a)(2)).\n(1) Health plan includes the following, singly or in combination:\n(i) A group health plan, as defined in this section.\n(ii) A health insurance issuer, as defined in this section.\n(iii) An HMO, as defined in this section.\n(iv) Part A or Part B of the Medicare program under title XVIII of the Act.\n(v) The Medicaid program under title XIX of the Act, 42 U.S.C. 1396, et seq.\n(vi) The Voluntary Prescription Drug Benefit Program under Part D of title XVIII of the Act, 42 U.S.C. 1395w-101 through 1395w-152.\n(vii) An issuer of a Medicare supplemental policy (as defined in section 1882(g)(1) of the Act, 42 U.S.C. 1395ss(g)(1)).\n(viii) An issuer of a long-term care policy, excluding a nursing home fixed indemnity policy.\n(ix) An employee welfare benefit plan or any other arrangement that is established or maintained for the purpose of offering or providing health benefits to the employees of two or more employers.\n(x) The health care program for uniformed services under title 10 of the United States Code.\n(xi) The veterans health care program under 38 U.S.C. chapter 17.\n(xii) The Indian Health Service program under the Indian Health Care Improvement Act, 25 U.S.C. 1601, et seq.\n(xiii) The Federal Employees Health Benefits Program under 5 U.S.C. 8902, et seq.\n(xiv) An approved State child health plan under title XXI of the Act, providing benefits for child health assistance that meet the requirements of section 2103 of the Act, 42 U.S.C. 1397, et seq.\n(xv) The Medicare Advantage program under Part C of title XVIII of the Act, 42 U.S.C. 1395w-21 through 1395w-28.\n(xvi) A high risk pool that is a mechanism established under State law to provide health insurance coverage or comparable coverage to eligible individuals.\n(xvii) Any other individual or group plan, or combination of individual or group plans, that provides or pays for the cost of medical care (as defined in section 2791(a)(2) of the PHS Act, 42 U.S.C. 300gg-91(a)(2)).\n(2) Health plan excludes:\n(i) Any policy, plan, or program to the extent that it provides, or pays for the cost of, excepted benefits that are listed in section 2791(c)(1) of the PHS Act, 42 U.S.C. 300gg-91(c)(1); and\n(ii) A government-funded program (other than one listed in paragraph (1)(i)-(xvi) of this definition):\n(A) Whose principal purpose is other than providing, or paying the cost of, health care; or\n(B) Whose principal activity is:\n(1) The direct provision of health care to persons; or\n(2) The making of grants to fund the direct provision of health care to persons.",
+      "heading": "Health plan",
+      "clause_type": null,
+      "modality": null,
+      "status": "in-force",
+      "jurisdiction": "federal",
+      "operative_terms": [
+        "an individual or group plan that provides, or pays the cost of, medical care (as defined in section 2791(a)(2) of the PHS Act, 42 U.S.C. 300gg-91(a)(2))",
+        "singly or in combination",
+        "A group health plan, as defined in this section",
+        "A health insurance issuer, as defined in this section",
+        "An HMO, as defined in this section",
+        "Part A or Part B of the Medicare program under title XVIII of the Act",
+        "The Medicaid program under title XIX of the Act, 42 U.S.C. 1396, et seq",
+        "The Voluntary Prescription Drug Benefit Program under Part D of title XVIII of the Act, 42 U.S.C. 1395w-101 through 1395w-152",
+        "An issuer of a Medicare supplemental policy (as defined in section 1882(g)(1) of the Act, 42 U.S.C. 1395ss(g)(1))",
+        "An issuer of a long-term care policy, excluding a nursing home fixed indemnity policy",
+        "An employee welfare benefit plan or any other arrangement that is established or maintained for the purpose of offering or providing health benefits to the employees of two or more employers",
+        "The health care program for uniformed services under title 10 of the United States Code",
+        "The veterans health care program under 38 U.S.C. chapter 17",
+        "The Indian Health Service program under the Indian Health Care Improvement Act, 25 U.S.C. 1601, et seq",
+        "The Federal Employees Health Benefits Program under 5 U.S.C. 8902, et seq",
+        "An approved State child health plan under title XXI of the Act, providing benefits for child health assistance that meet the requirements of section 2103 of the Act, 42 U.S.C. 1397, et seq",
+        "The Medicare Advantage program under Part C of title XVIII of the Act, 42 U.S.C. 1395w-21 through 1395w-28",
+        "A high risk pool that is a mechanism established under State law to provide health insurance coverage or comparable coverage to eligible individuals",
+        "Any other individual or group plan, or combination of individual or group plans, that provides or pays for the cost of medical care (as defined in section 2791(a)(2) of the PHS Act, 42 U.S.C. 300gg-91(a)(2))",
+        "Any policy, plan, or program to the extent that it provides, or pays for the cost of, excepted benefits that are listed in section 2791(c)(1) of the PHS Act, 42 U.S.C. 300gg-91(c)(1)",
+        "A government-funded program (other than one listed in paragraph (1)(i)-(xvi) of this definition)",
+        "Whose principal purpose is other than providing, or paying the cost of, health care",
+        "principal activity",
+        "The direct provision of health care to persons",
+        "The making of grants to fund the direct provision of health care to persons"
+      ],
+      "implications": [],
+      "source_url": "https://www.ecfr.gov/on/2026-10-15/title-45/section-160.103",
+      "retrieved_at": "2026-10-18T01:03:28.676722Z"
+    },
+    {
+      "id": "45-CFR-160.103-def-protected-health-information",
+      "framework": "HIPAA-Definitions",
+      "text": "Protected health information means individually identifiable health information:\n(1) Except as provided in paragraph (2) of this definition, that is:\n(i) Transmitted by electronic media;\n(ii) Maintained in electronic media; or\n(iii) Transmitted or maintained in any other form or medium.\n(2) Protected health information excludes individually identifiable health information:\n(i) In education records covered by the Family Educational Rights and Privacy Act, as amended, 20 U.S.C. 1232g;\n(ii) In records described at 20 U.S.C. 1232g(a)(4)(B)(iv);\n(iii) In employment records held by a covered entity in its role as employer; and\n(iv) Regarding a person who has been deceased for more than 50 years.",
+      "heading": "Protected health information",
+      "clause_type": null,
+      "modality": null,
+      "status": "in-force",
+      "jurisdiction": "federal",
+      "operative_terms": [
+        "individually identifiable health information",
+        "Transmitted by electronic media",
+        "Maintained in electronic media",
+        "Transmitted or maintained in any other form or medium",
+        "In education records covered by the Family Educational Rights and Privacy Act, as amended, 20 U.S.C. 1232g",
+        "In records described at 20 U.S.C. 1232g(a)(4)(B)(iv)",
+        "In employment records held by a covered entity in its role as employer",
+        "Regarding a person who has been deceased for more than 50 years"
+      ],
+      "implications": [],
+      "source_url": "https://www.ecfr.gov/on/2026-10-15/title-45/section-160.103",
+      "retrieved_at": "2026-10-18T01:03:28.676722Z"
+    },
+    {
+      "id": "45-CFR-160.103-def-electronic-protected-health-information",
+      "framework": "HIPAA-Definitions",
+      "text": "Electronic protected health information means information that comes within paragraphs (1)(i) or (1)(ii) of the definition of protected health information as specified in this section.",
+      "heading": "Electronic protected health information",
+      "clause_type": null,
+      "modality": null,
+      "status": "in-force",
+      "jurisdiction": "federal",
+      "operative_terms": [
+        "paragraphs (1)(i) or (1)(ii)",
+        "protected health information",
+        "as specified in this section"
+      ],
+      "implications": [],
+      "source_url": "https://www.ecfr.gov/on/2026-10-15/title-45/section-160.103",
+      "retrieved_at": "2026-10-18T01:03:28.676722Z"
+    },
+    {
+      "id": "45-CFR-160.103-def-transaction",
+      "framework": "HIPAA-Definitions",
+      "text": "Transaction means the transmission of information between two parties to carry out financial or administrative activities related to health care. It includes the following types of information transmissions:\n(1) Health care claims or equivalent encounter information.\n(2) Health care payment and remittance advice.\n(3) Coordination of benefits.\n(4) Health care claim status.\n(5) Enrollment and disenrollment in a health plan.\n(6) Eligibility for a health plan.\n(7) Health plan premium payments.\n(8) Referral certification and authorization.\n(9) First report of injury.\n(10) Health care claims attachments.\n(11) Health care electronic funds transfers (EFT) and remittance advice.\n(12) Other transactions that the Secretary may prescribe by regulation.",
+      "heading": "Transaction",
+      "clause_type": null,
+      "modality": null,
+      "status": "in-force",
+      "jurisdiction": "federal",
+      "operative_terms": [
+        "the transmission of information between two parties to carry out financial or administrative activities related to health care",
+        "Other transactions that the Secretary may prescribe by regulation"
+      ],
+      "implications": [],
+      "source_url": "https://www.ecfr.gov/on/2026-10-15/title-45/section-160.103",
+      "retrieved_at": "2026-10-18T01:03:28.676722Z"
+    }
+  ]
+}

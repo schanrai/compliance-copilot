@@ -1,11 +1,13 @@
 """Requirements and the deterministic checks that guard them (PRD §8.2, §8.6).
 
-Checks 1–4 and 6 run when a `Requirement` is built, so an invalid one cannot
-exist. Check 5 (scope, via the broadening lexicon) arrives in Phase 2.
+Checks 1–6 run when a `Requirement` is built, so an invalid one cannot exist.
+Check 5 rejects wording that uses a lexicon term broader than one of the cited
+clause's operative terms.
 
-Checks 1–3 need the corpus. It is passed in as a `RequirementContext`, either
-as Pydantic validation context or with `requirement_context(...)`. With no
-context, the requirement is rejected: the checks cannot be skipped.
+Checks 1–3 and 5 need the corpus and the lexicon. They are passed in as a
+`RequirementContext`, either as Pydantic validation context or with
+`requirement_context(...)`. With no context, the requirement is rejected: the
+checks cannot be skipped.
 """
 
 from __future__ import annotations
@@ -20,6 +22,7 @@ from typing import Callable, Self, TypeVar
 
 from pydantic import ValidationInfo, model_validator
 
+from compliance_copilot.corpus.lexicon import Lexicon
 from compliance_copilot.models._base import Identifier, ImmutableModel, NonBlankStr
 from compliance_copilot.models.clause import (
     Clause,
@@ -68,12 +71,13 @@ def _index(
 
 @dataclass(frozen=True, slots=True)
 class RequirementContext:
-    """What a requirement is checked against: the corpus and the analysis so far."""
+    """What a requirement is checked against: the corpus, the lexicon, and the analysis so far."""
 
     clauses: Mapping[str, Clause]
     declarations: Mapping[str, FrameworkDeclaration]
     implication_ids: frozenset[str]
     requirements: Mapping[str, Requirement]
+    lexicon: Lexicon
 
     @classmethod
     def build(
@@ -81,6 +85,7 @@ class RequirementContext:
         *,
         clauses: Iterable[Clause],
         declarations: Iterable[FrameworkDeclaration],
+        lexicon: Lexicon,
         implication_ids: Iterable[str] = (),
         requirements: Iterable[Requirement] = (),
     ) -> RequirementContext:
@@ -89,6 +94,7 @@ class RequirementContext:
             declarations=_index(declarations, lambda d: d.framework, "framework"),
             implication_ids=frozenset(implication_ids),
             requirements=_index(requirements, lambda r: r.id, "requirement"),
+            lexicon=lexicon,
         )
 
     def with_requirement(self, requirement: Requirement) -> RequirementContext:
@@ -97,6 +103,7 @@ class RequirementContext:
         return RequirementContext.build(
             clauses=self.clauses.values(),
             declarations=self.declarations.values(),
+            lexicon=self.lexicon,
             implication_ids=self.implication_ids,
             requirements=(*self.requirements.values(), requirement),
         )
@@ -203,7 +210,7 @@ class Requirement(ImmutableModel):
         return problems
 
     def _corpus_problems(self, context: RequirementContext) -> list[str]:
-        """Check 1, the declaration part of check 2, and the resolution part of check 3."""
+        """Checks 1, 2, 3, and 5: citation, declaration, derived fields, and scope."""
 
         clause = context.clauses.get(self.citation)
         if clause is None:
@@ -252,4 +259,11 @@ class Requirement(ImmutableModel):
                     f"implication_id '{self.implication_id}' is not in the list of "
                     "implications (check 3)"
                 )
+        problems.extend(
+            f"wording uses {used!r}, which is broader than operative term "
+            f"{operative!r} (check 5)"
+            for used, operative in context.lexicon.broader_uses(
+                self.text, clause.operative_terms
+            )
+        )
         return problems

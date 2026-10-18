@@ -5,15 +5,13 @@ from __future__ import annotations
 import logging
 from collections import Counter
 from pathlib import Path
-from typing import Any
 
 import yaml
 from pydantic import ValidationError
-from yaml.constructor import ConstructorError
-from yaml.nodes import MappingNode
 
 from compliance_copilot.golden.models import GoldenCase
 from compliance_copilot.log import PipelineStage, log_stage
+from compliance_copilot.strict_yaml import load_strict_yaml
 
 logger = logging.getLogger(__name__)
 
@@ -27,41 +25,6 @@ class GoldenCaseError(Exception):
         super().__init__(f"{path}: {reason}")
         self.path = path
         self.reason = reason
-
-
-class _NoDuplicateKeysLoader(yaml.SafeLoader):
-    """Safe loader that rejects repeated mapping keys.
-
-    Plain `yaml.safe_load` keeps the last value of a repeated key without
-    warning, so a fixture could silently lose an answer.
-    """
-
-
-def _construct_mapping_without_duplicates(
-    loader: _NoDuplicateKeysLoader, node: MappingNode, deep: bool = False
-) -> dict[Any, Any]:
-    seen: set[Any] = set()
-    for key_node, _ in node.value:
-        key = loader.construct_object(key_node, deep=deep)
-        try:
-            is_repeat = key in seen
-        except TypeError:
-            break  # unhashable key; construct_mapping reports it
-        if is_repeat:
-            raise ConstructorError(
-                "while constructing a mapping",
-                node.start_mark,
-                f"found duplicate key {key!r}",
-                key_node.start_mark,
-            )
-        seen.add(key)
-    return loader.construct_mapping(node, deep=deep)
-
-
-_NoDuplicateKeysLoader.add_constructor(
-    yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG,
-    _construct_mapping_without_duplicates,
-)
 
 
 def _format_validation_error(exc: ValidationError) -> str:
@@ -78,7 +41,7 @@ def _read_case(path: Path) -> GoldenCase:
     except OSError as exc:
         raise GoldenCaseError(path, f"cannot read file: {exc}") from exc
     try:
-        data = yaml.load(raw_text, Loader=_NoDuplicateKeysLoader)
+        data = load_strict_yaml(raw_text)
     except yaml.YAMLError as exc:
         raise GoldenCaseError(path, f"invalid YAML: {exc}") from exc
     if data is None:

@@ -40,6 +40,9 @@ _RESERVED_KEYS = frozenset(
 
 class PipelineStage(StrEnum):
     LOAD_CASES = "load_cases"
+    CORPUS_INGEST = "corpus_ingest"
+    CORPUS_LOAD = "corpus_load"
+    CORPUS_LOOKUP = "corpus_lookup"
     INTAKE = "intake"
     ROUTER = "router"
     SPECIALIST = "specialist"

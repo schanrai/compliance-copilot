@@ -1,0 +1,79 @@
+# Corpus ingestion manifest. The prototype corpus is the demo clauses only (plan §4 Phase 1).
+# Boundaries are decided here; text comes from the eCFR response; labels from the printed heading.
+# Regenerate: uv run python -m compliance_copilot.cli ingest-corpus --on <YYYY-MM-DD>
+
+title: 45
+status: in-force
+jurisdiction: federal
+
+frameworks:
+  # 45 CFR 160.103. Part 160 definitions carry no standard/specification hierarchy.
+  - summary_framework: HIPAA
+    declaration:
+      framework: HIPAA-Definitions
+      clause_types: []
+      grades_specifications: false
+    clauses:
+      - {kind: definition, section: "160.103", term: Business associate}
+      - {kind: definition, section: "160.103", term: Covered entity}
+      - {kind: definition, section: "160.103", term: Health care provider}
+      - {kind: definition, section: "160.103", term: Health plan}
+      - {kind: definition, section: "160.103", term: Protected health information}
+      - {kind: definition, section: "160.103", term: Electronic protected health information}
+      - {kind: definition, section: "160.103", term: Transaction}
+
+  # 45 CFR Part 164 Subpart C. 164.306(d) grades specifications Required/Addressable "in this subpart".
+  - summary_framework: HIPAA
+    declaration:
+      framework: HIPAA-Security
+      clause_types: [standard, implementation_specification]
+      grades_specifications: true
+    clauses:
+      - kind: paragraph
+        section: "164.306"
+        paragraph: "(c)"
+        starts_with: "(c) Standards."
+      - kind: paragraph
+        section: "164.306"
+        paragraph: "(d)"
+        starts_with: "(d) Implementation specifications."
+        ends_before: "(e) Maintenance."
+      - kind: paragraph
+        section: "164.312"
+        paragraph: "(a)(1)"
+        starts_with: "(a)(1) Standard: Access control."
+      - kind: paragraph
+        section: "164.312"
+        paragraph: "(a)(2)(i)"
+        starts_with: "(i) Unique user identification (Required)."
+      - kind: paragraph
+        section: "164.312"
+        paragraph: "(a)(2)(iv)"
+        starts_with: "(iv) Encryption and decryption (Addressable)."
+      - kind: paragraph
+        section: "164.312"
+        paragraph: "(b)"
+        starts_with: "(b) Standard: Audit controls."
+
+  # 45 CFR Part 164 Subpart D. Outside 164.306(d), so specifications carry no Required/Addressable.
+  # The source prints standards here too (164.404(a), 164.410(a): "Standard—"), so the
+  # declaration lists both clause types. No Subpart D standard is in this corpus.
+  - summary_framework: HIPAA
+    declaration:
+      framework: HIPAA-Breach-Notification
+      clause_types: [standard, implementation_specification]
+      grades_specifications: false
+    clauses:
+      - kind: paragraph
+        section: "164.404"
+        paragraph: "(b)"
+        starts_with: "(b) Implementation specification: Timeliness of notification."
+      - kind: paragraph
+        section: "164.410"
+        paragraph: "(b)"
+        starts_with: "(b) Implementation specifications: Timeliness of notification."
+      - kind: paragraph
+        section: "164.410"
+        paragraph: "(c)"
+        starts_with: "(c) Implementation specifications: Content of notification."
+        to_section_end: true

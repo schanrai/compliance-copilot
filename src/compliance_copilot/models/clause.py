@@ -6,7 +6,7 @@ from collections import Counter
 from enum import StrEnum
 from typing import Self
 
-from pydantic import AwareDatetime, HttpUrl, model_validator
+from pydantic import AwareDatetime, HttpUrl, field_serializer, model_validator
 
 from compliance_copilot.models._base import Identifier, ImmutableModel, NonBlankStr
 
@@ -107,6 +107,10 @@ class FrameworkDeclaration(ImmutableModel):
     framework: FrameworkId
     clause_types: frozenset[ClauseType]
     grades_specifications: bool
+
+    @field_serializer("clause_types")
+    def _sorted_clause_types(self, clause_types: frozenset[ClauseType]) -> list[str]:
+        return sorted(t.value for t in clause_types)
 
     @model_validator(mode="after")
     def _grading_needs_specifications(self) -> Self:
