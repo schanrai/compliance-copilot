@@ -21,7 +21,7 @@ from compliance_copilot.golden.loader import GoldenCaseError, load_golden_case
 from compliance_copilot.log import configure_logging
 from compliance_copilot.models import Framework
 from compliance_copilot.render.clause import clause_panel
-from compliance_copilot.render.determination import determination_panel
+from compliance_copilot.render.determination import determination_panel, intake_panel
 from compliance_copilot.router import RunError, run_determination
 
 app = typer.Typer(no_args_is_help=True, add_completion=False)
@@ -74,7 +74,8 @@ def determine(
     except (GoldenCaseError, RunError) as exc:
         out.print(f"[red]{exc}[/red]")
         raise typer.Exit(code=1) from exc
-    out.print(determination_panel(loaded.stated, run))
+    out.print(intake_panel(loaded.stated, case_id=loaded.id, title=loaded.title))
+    out.print(determination_panel(loaded.stated, run.decision))
     out.print(f"{loaded.id}: {run.decision.determination.value.value}")
 
 

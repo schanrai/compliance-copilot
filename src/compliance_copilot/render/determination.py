@@ -18,8 +18,8 @@ from compliance_copilot.models import (
     FieldState,
     StatedFacts,
 )
+from compliance_copilot.router.determine import CoveredEntityDecision
 from compliance_copilot.router.paths import FIELD_LABELS, customer_phrase, field_at
-from compliance_copilot.router.run import CoveredEntityRun
 
 _STATUS = {
     CoveredEntityStatus.COVERED_ENTITY: ("Covered entity", "green"),
@@ -39,16 +39,88 @@ _ADVISORY = (
     "It is not legal advice."
 )
 
+# Every intake answer, in the order the founder is asked. Includes fields the
+# determination does not use, so a not-asked question is visible.
+_CLINIC_BILLING_QUESTION = (
+    "Does the clinic you sell to bill insurers electronically, "
+    "either directly or through a billing company?"
+)
 
-def determination_panel(stated: StatedFacts, run: CoveredEntityRun) -> Panel:
+_INTAKE_FIELDS = (
+    ("customer_types", FIELD_LABELS["stated.hipaa_situation.customer_types"]),
+    ("customers_bill_insurers_electronically", _CLINIC_BILLING_QUESTION),
+    (
+        "receives_patient_data_from_others",
+        FIELD_LABELS["stated.hipaa_situation.receives_patient_data_from_others"],
+    ),
+    (
+        "receives_clinical_information",
+        FIELD_LABELS["stated.hipaa_situation.receives_clinical_information"],
+    ),
+    (
+        "has_signed_agreements_with_healthcare_orgs",
+        "Whether you have a signed agreement with a healthcare organization",
+    ),
+    (
+        "bills_insurers_electronically",
+        FIELD_LABELS["stated.hipaa_situation.bills_insurers_electronically"],
+    ),
+    ("provides_care_directly", FIELD_LABELS["stated.hipaa_situation.provides_care_directly"]),
+)
+
+
+def intake_panel(stated: StatedFacts, *, case_id: str, title: str) -> Panel:
+    """The use case and every intake answer, including questions that were not asked."""
+
+    description = stated.product.description.value
+    body: list[Text] = [
+        Text("Product", style="bold"),
+        Text(description if isinstance(description, str) else ""),
+        Text(""),
+        Text("Intake", style="bold"),
+    ]
+    for name, label in _INTAKE_FIELDS:
+        field = getattr(stated.hipaa_situation, name)
+        body.append(Text(f"• {_intake_line(stated, name, label, field)}"))
+    return Panel(Group(*body), title=f"{case_id} — {title}", title_align="left")
+
+
+def _intake_line(stated: StatedFacts, name: str, label: str, field: Field[object]) -> str:
+    """One intake row. The clinic-billing question is only worded that way for clinics."""
+
+    if name != "customers_bill_insurers_electronically" or _customers_include_clinics(stated):
+        return f"{label}: {_format_value(field)}"
+    customers = stated.hipaa_situation.customer_types
+    if (
+        customers.state is FieldState.ANSWERED
+        and customers.value is not None
+        and field.state is FieldState.NOT_ASKED
+    ):
+        return (
+            "Whether your customers bill insurers electronically: not asked, "
+            f"because your customers are {customer_phrase(customers.value)}"
+        )
+    return f"Whether your customers bill insurers electronically: {_format_value(field)}"
+
+
+def _customers_include_clinics(stated: StatedFacts) -> bool:
+    customers = stated.hipaa_situation.customer_types
+    return (
+        customers.state is FieldState.ANSWERED
+        and customers.value is not None
+        and CustomerType.CLINICS in customers.value
+    )
+
+
+def determination_panel(stated: StatedFacts, decision: CoveredEntityDecision) -> Panel:
     """The determination, the answers it used, and what would settle it."""
 
-    determination = run.decision.determination
+    determination = decision.determination
     label, style = _STATUS[determination.value]
     body: list[Text] = [
         Text(label, style=f"bold {style}"),
         Text(""),
-        Text(run.decision.rationale),
+        Text(decision.rationale),
         Text(""),
         Text("Answers this used", style="bold"),
     ]

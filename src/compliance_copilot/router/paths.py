@@ -23,7 +23,7 @@ _ORDER = (CUSTOMERS, CUSTOMERS_BILL, RECEIVES, CLINICAL, CARE, BILLS)
 
 FIELD_LABELS: dict[str, str] = {
     CUSTOMERS: "Who your customers are",
-    CUSTOMERS_BILL: "Whether your clinic customers bill insurers electronically",
+    CUSTOMERS_BILL: "Whether the clinic you sell to bills insurers electronically",
     RECEIVES: "Whether you receive patient data from someone else",
     CLINICAL: "Whether that data includes clinical information",
     BILLS: "Whether you bill insurers electronically",

@@ -23,11 +23,13 @@ from compliance_copilot.models import (
     IntakeDetail,
     RouterDetail,
     Stage,
+    StatedFacts,
     TraceAction,
     TraceStep,
 )
-from compliance_copilot.render.determination import determination_panel
+from compliance_copilot.render.determination import determination_panel, intake_panel
 from compliance_copilot.router import determine, run_determination
+from compliance_copilot.router.determine import CoveredEntityDecision
 from compliance_copilot.router.paths import CUSTOMERS_BILL
 
 CASES = Path(__file__).parent / "cases"
@@ -60,13 +62,17 @@ def _snapshot(field: Field[object]) -> tuple[object, ...]:
 
 
 @pytest.mark.parametrize("path", CASE_FILES, ids=[path.stem for path in CASE_FILES])
-def test_golden_determination_matches(path: Path) -> None:
+def test_golden_determination_matches(
+    path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
     case = load_golden_case(path)
-    determination = determine(case.stated).determination
+    decision = determine(case.stated)
+    determination = decision.determination
 
     assert determination.value is case.expected.covered_entity_status
     assert determination.ambiguity_cause is case.expected.ambiguity_cause
     assert determination.derived_from == case.expected.derived_from
+    _show_case(capsys, case.id, case.title, case.stated, decision)
 
 
 def test_one_founder_answer_flips_the_wellness_app_to_a_business_associate() -> None:
@@ -133,16 +139,42 @@ def test_an_unknown_answer_is_its_own_intake_step() -> None:
     assert "don't know" in unknown[0].rationale
 
 
+def _show_case(
+    capsys: pytest.CaptureFixture[str],
+    case_id: str,
+    title: str,
+    stated: StatedFacts,
+    decision: CoveredEntityDecision,
+) -> None:
+    """Print the use case, the intake, and the reasoning while the test runs.
+
+    Pytest captures output, so this turns capture off for the two panels.
+    The JSON stage logs stay captured.
+    """
+
+    review = Console(width=100)
+    with capsys.disabled():
+        review.print()
+        review.print(intake_panel(stated, case_id=case_id, title=title))
+        review.print(determination_panel(stated, decision))
+
+
 def _text(case_name: str) -> str:
     case = load_golden_case(CASES / case_name)
-    run = run_determination(case.stated, analysis_id=case.id, at=T0)
+    decision = determine(case.stated)
     console = Console(record=True, width=100, file=io.StringIO())
-    console.print(determination_panel(case.stated, run))
-    return re.sub(r"[│╭╮╰╯─]", " ", console.export_text())
+    console.print(intake_panel(case.stated, case_id=case.id, title=case.title))
+    console.print(determination_panel(case.stated, decision))
+    plain = re.sub(r"[│╭╮╰╯─]", " ", console.export_text())
+    return re.sub(r"\s+", " ", plain)
 
 
 def test_determinations_print_the_status_and_the_reasoning() -> None:
     business_associate = _text("g-01.yaml")
+    assert "Records platform sold to clinics" in business_associate
+    assert "Intake" in business_associate
+    assert "Software sold to clinics" in business_associate
+    assert "Does the clinic you sell to bill insurers electronically, either directly or through a billing company?" in business_associate
     assert "Business associate" in business_associate
     assert "45 CFR 160.103" in business_associate
     assert "was not used" in business_associate
@@ -157,6 +189,11 @@ def test_determinations_print_the_status_and_the_reasoning() -> None:
     assert "Covered entity" in covered
     assert "What would settle it" not in covered
 
+    wellness = _text("g-02.yaml")
+    assert "because your customers are consumers" in wellness
+    assert "Does the clinic you sell to" not in wellness
+    assert "your clinic customers" not in wellness
+
     missing = _text("g-05.yaml")
     assert "you don't know" in missing
     assert "Missing a fact" in missing
@@ -169,6 +206,8 @@ def test_determine_command_prints_a_golden_case(monkeypatch: pytest.MonkeyPatch)
     result = CliRunner().invoke(app, ["determine", str(CASES / "g-06.yaml")])
 
     assert result.exit_code == 0, result.output
+    assert "Software sold to a health insurer" in result.output
+    assert "Intake" in result.output
     assert "Business associate" in result.output
     assert "G-06: business_associate" in result.output
     assert "not asked" in result.output

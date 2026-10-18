@@ -71,7 +71,7 @@ _SUBCONTRACTOR = CustomerType.COMPANIES_HANDLING_PATIENT_DATA_FOR_PROVIDERS
 _NOT_COVERED_CUSTOMERS = frozenset({CustomerType.CONSUMERS, CustomerType.EMPLOYERS})
 
 _CLINIC_BILLING = (
-    "whether your clinic customers bill insurers electronically, "
+    "whether the clinic you sell to bills insurers electronically, "
     "either directly or through a billing company"
 )
 _CAUSE_RANK = {
@@ -477,7 +477,7 @@ def _clinic_billing_question(state: FieldState) -> str:
     return _question_for(
         state,
         _CLINIC_BILLING,
-        "whether those clinics are covered entities",
+        "whether the clinic you sell to is a covered entity",
     )
 
 

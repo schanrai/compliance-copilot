@@ -279,6 +279,7 @@ Gate 1 passed 2026-10-17 — `reports/phase-1_qa.md`. R2 verified as believed.
 7. **A subcontractor customer is `requires_document_we_cannot_see` only when no customer is a settled covered entity.** A settled covered entity in the same list is a business associate. Not receiving patient data rules the business-associate branch out before billing or the contract question is reached.
 8. **Employers are not covered entities,** and they are not read as group health plans. Clearinghouses, and a founder who is themselves a health plan, are not in the intake.
 9. **Billing through a billing company is not a router rule.** The unresolved question uses the intake wording: "either directly or through a billing company."
+10. **The clinic-billing question names the customer.** Founder-facing text asks whether the clinic you sell to bills insurers electronically. "Your clinic" was readable as the founder's own company, which is the other question.
 
 ---
 
