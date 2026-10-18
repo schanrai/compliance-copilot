@@ -1,0 +1,31 @@
+id: G-04
+title: Scheduling tool sold to clinics
+stated:
+  product:
+    description: {value: "Scheduling tool sold to clinics that receives patient names, appointment times and provider identity, and no clinical notes or diagnoses", source: qa_answer, state: answered}
+  hipaa_situation:
+    customer_types: {value: [clinics], source: qa_answer, state: answered}
+    customers_bill_insurers_electronically: {value: true, source: qa_answer, state: answered}
+    receives_patient_data_from_others: {value: true, source: qa_answer, state: answered}
+    receives_clinical_information: {value: false, source: qa_answer, state: answered}
+    has_signed_agreements_with_healthcare_orgs: {value: true, source: qa_answer, state: answered}
+expected:
+  covered_entity_status: ambiguous
+  ambiguity_cause: contested_question
+  derived_from:
+    - stated.hipaa_situation.customer_types
+    - stated.hipaa_situation.customers_bill_insurers_electronically
+    - stated.hipaa_situation.receives_patient_data_from_others
+    - stated.hipaa_situation.receives_clinical_information
+  framework_summary:
+    HIPAA: unresolved
+    HBNR: not_assessed
+    FTC_5: not_assessed
+    WA_MHMDA: not_assessed
+    CT: not_assessed
+    NV: not_assessed
+    TX_NE: not_assessed
+    SOC_2: not_assessed
+    PCI_DSS: not_assessed
+  requirements: []
+  ambiguous_components: [1, 2, 3, 4, 6]

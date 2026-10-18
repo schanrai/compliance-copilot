@@ -61,6 +61,12 @@ class HipaaSituation(ImmutableModel):
     receives_patient_data_from_others: Field[StrictBool] = PydanticField(
         default_factory=Field[StrictBool].not_asked
     )
+    # "Does your product receive clinical information about patients, such as
+    # diagnoses, clinical notes or test results, or only scheduling details?"
+    # False means scheduling details only: names, appointment times, provider identity.
+    receives_clinical_information: Field[StrictBool] = PydanticField(
+        default_factory=Field[StrictBool].not_asked
+    )
     has_signed_agreements_with_healthcare_orgs: Field[StrictBool] = PydanticField(
         default_factory=Field[StrictBool].not_asked
     )

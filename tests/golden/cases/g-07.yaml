@@ -1,0 +1,28 @@
+id: G-07
+title: Sells to a company that handles patient data for clinics
+stated:
+  product:
+    description: {value: "Software sold to a company that handles patient data for clinics. The product stores that data, including clinical information. The founder is not a party to the company's contracts with the clinics, and the tool cannot read them", source: qa_answer, state: answered}
+  hipaa_situation:
+    customer_types: {value: [companies_handling_patient_data_for_providers], source: qa_answer, state: answered}
+    receives_patient_data_from_others: {value: true, source: qa_answer, state: answered}
+    receives_clinical_information: {value: true, source: qa_answer, state: answered}
+expected:
+  covered_entity_status: ambiguous
+  ambiguity_cause: requires_document_we_cannot_see
+  derived_from:
+    - stated.hipaa_situation.customer_types
+    - stated.hipaa_situation.receives_patient_data_from_others
+    - stated.hipaa_situation.receives_clinical_information
+  framework_summary:
+    HIPAA: unresolved
+    HBNR: not_assessed
+    FTC_5: not_assessed
+    WA_MHMDA: not_assessed
+    CT: not_assessed
+    NV: not_assessed
+    TX_NE: not_assessed
+    SOC_2: not_assessed
+    PCI_DSS: not_assessed
+  requirements: []
+  ambiguous_components: [1, 2, 3, 4, 6]

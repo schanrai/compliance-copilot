@@ -18,7 +18,7 @@
 | Item | Notes |
 |---|---|
 | Covered-entity determination — **three states** | covered entity · business associate · neither · ambiguous, with named cause. Plain Python rules, no model |
-| Three step-3 rules | Customer status read from `customers_bill_insurers_electronically` (health plan customers need no question; `unknown_to_user` → ambiguous, `missing_fact`). Subcontractor customer type → ambiguous. Clinic using a billing company → never *neither* |
+| Three step-3 rules | Customer status read from `customers_bill_insurers_electronically` (health plan customers need no question — G-06; `unknown_to_user` → ambiguous, `missing_fact`). Subcontractor customer type → ambiguous. A clinic billing through a billing company is caught by the intake question wording (PRD §21 item 2), not by a Router rule |
 | Framework summary — four categories | Every framework lands in exactly one: in scope / out of scope / unresolved / not assessed |
 | Ambiguous output — components 1–4 and 6 | Component 5 is out (PRD §17.9) |
 | One **cited** requirement | 164.312(b), produced by **template** |
@@ -73,18 +73,18 @@ Each phase ends at a **QA gate**: named checks that must pass before the next ph
 
 **The user writes the golden-set cases and expected labels; Claude pressure-tests them.** The labels are a healthcare judgement.
 
-**Slots.** The scenario sketches below come from decisions already made; the expected outcomes are drafts to confirm or correct in this session.
+**Slots.** G-01 to G-08 are confirmed labels.
 
-| ID | Scenario | Draft expectation | Why it's in |
+| ID | Scenario | Expected label | Why it's in |
 |---|---|---|---|
-| G-01 | Software sold to clinics; creates and stores patient records on their behalf; clinics bill insurance electronically; signed agreements | Business associate · HIPAA in scope · cited 164.312(b) | Diagram Example A. Clean *applies* |
-| G-02 | Consumer wellness app; sold direct; tracks symptoms and medications; user entry + wearable; no clinic contracts, no patient data received, bills no insurer | Neither · HIPAA out of scope · HBNR *not assessed* | Diagram Example B intake. Clean *does not apply*; demo moment 1 |
-| G-03 | G-02 with one answer changed: contracts with a clinic to handle patient data (clinic billing answered) | Business associate · HIPAA in scope | The one-answer flip |
-| G-04 | Scheduling tool sold to clinics; names, appointment times, provider identity; no clinical notes; contract unseen | Ambiguous · `requires_document_we_cannot_see` or `contested_question` — decide which | PRD §9.1 worked example |
-| G-05 | Clinic-facing tool; clinics' insurance billing `unknown_to_user` | Ambiguous · `missing_fact` | Second ambiguity cause |
-| G-06 | Clinic customer bills through a billing company | Covered path or ambiguous — **never neither** | Adversarial: proxy-question trap |
-| G-07 | Customer is a company that handles patient data for providers (subcontractor case) | Ambiguous | Prototype rule from step 3 |
-| G-08 | Founder's company provides care directly and bills insurers electronically | Covered entity · HIPAA in scope | The third determined state |
+| G-01 | Software sold to clinics; creates and stores patient records, including clinical information, on their behalf; clinics bill insurance electronically; signed agreements | **Business associate.** The clinics bill insurers electronically, so they are covered entities. The company creates and stores clinical records for them, so it handles protected health information on their behalf. A signed agreement does not decide the status. HIPAA in scope; cited 164.312(b) | Diagram Example A. Clean *applies* |
+| G-02 | Consumer wellness app; sold direct; tracks symptoms and medications; user entry + wearable; no clinic contracts, no patient data received, bills no insurer | **Neither.** The company does not provide care and bills no insurer, so it is not a covered entity. Its customers are consumers and it receives no patient data, so it is not a business associate. HIPAA out of scope. HBNR is *not assessed* | Diagram Example B intake. Clean *does not apply*; demo moment 1 |
+| G-03 | Consumer wellness app; sold direct; tracks symptoms and medications; also contracts with a clinic to handle that clinic's patient data; the clinic bills insurance electronically; the company itself bills no insurer | **Business associate.** The clinic bills insurance electronically, so it is a covered entity, and the company handles that clinic's patient data. The company's consumer business, and the fact that it bills no insurer itself, do not make it a covered entity. HIPAA in scope; cited 164.312(b) | The one-answer flip from G-02. One founder answer fills four intake fields |
+| G-04 | Scheduling tool sold to clinics; clinics bill insurance electronically; names, appointment times, provider identity; no clinical notes; contract unseen | **Ambiguous, `contested_question`.** The clinics are covered entities. The facts are known, and whether names, appointment times, and provider identity are protected health information is not settled. The unseen contract is not the cause. HIPAA unresolved; no cited requirement | PRD §9.1 worked example |
+| G-05 | Clinic-facing tool; receives and stores the clinics' patient records, including clinical information; clinics' insurance billing `unknown_to_user` | **Ambiguous, `missing_fact`.** The company stores the clinics' clinical records. The only open fact is whether those clinics bill insurance electronically, and the founder does not know. HIPAA unresolved; no cited requirement | The clinic-billing answer alone is unknown, so only that rule can produce the ambiguity |
+| G-06 | Software sold to a health insurer; stores the insurer's member records | **Business associate.** A health plan is a covered entity by definition, so the clinic-billing question is not asked. Member records held by a health plan are protected health information, and the company stores them. HIPAA in scope; cited 164.312(b) | Health plan customers need no billing question |
+| G-07 | Sells to a company that handles patient data for clinics; the product stores that data, including clinical information; the company's contracts with the clinics are unseen | **Ambiguous, `requires_document_we_cannot_see`.** The company stores clinical data for its customer. Whether that customer is a business associate depends on the customer's contracts with the clinics. The founder is not a party to those contracts, and another intake question cannot settle it. HIPAA unresolved; no cited requirement | Subcontractor customer type |
+| G-08 | Founder's company provides care directly and bills insurers electronically | **Covered entity.** The company provides care and bills insurers electronically, so it is a provider transmitting health information in a covered transaction. Billing alone would not be enough. HIPAA in scope; cited 164.312(b) | The founder is the covered entity |
 
 **Every case also asserts:** the four-category framework summary (all non-HIPAA frameworks *not assessed* in the prototype), `derived_from` field paths, and that every trace chain terminates at intake.
 
@@ -113,10 +113,10 @@ expected:
 ```
 
 **QA gate G**
-- [ ] 8 cases written, each with every expected field filled
-- [ ] Each ambiguous case names one cause, and the causes differ across cases
-- [ ] Claude pressure-test done; disagreements resolved or logged
-- [ ] Fixtures validate against the Phase 0 models (checked at the end of Phase 0)
+- [x] 8 cases written, each with every expected field filled
+- [x] Each ambiguous case names one cause, and the causes differ across cases
+- [x] Claude pressure-test done; disagreements resolved or logged
+- [x] Fixtures validate against the Phase 0 models (`uv run pytest tests/golden`: 9 passed, 2026-10-17)
 
 ---
 
@@ -192,11 +192,11 @@ compliance-copilot/
 - Logging writes one structured line per pipeline stage
 
 **QA gate 0**
-- [ ] Fresh clone → `uv sync` → `pytest` passes
-- [ ] `pip-audit` clean; every version pinned exactly
-- [ ] All 8 golden cases load and validate against the models
-- [ ] Unit tests: a cited requirement with `modality: required` on a `standard` is **rejected**; a derived requirement missing `implication_id` is **rejected**; a requirement with no `evidence_type` is **rejected**
-- [ ] No hard-coded paths or keys; config comes from env
+- [x] Fresh clone → `uv sync` → `pytest` passes
+- [x] `pip-audit` clean; every version pinned exactly
+- [x] All 8 golden cases load and validate against the models
+- [x] Unit tests: a cited requirement with `modality: required` on a `standard` is **rejected**; a derived requirement missing `implication_id` is **rejected**; a requirement with no `evidence_type` is **rejected**
+- [x] No hard-coded paths or keys; config comes from env
 
 ---
 
@@ -254,15 +254,15 @@ compliance-copilot/
 2. The three locked rules:
    - Provider customers → read `customers_bill_insurers_electronically`. Health plan customers are covered entities with no question. `unknown_to_user` → ambiguous, `missing_fact`
    - Subcontractor customer type → ambiguous
-   - Billing company → never *neither*
+   - A clinic that bills insurance through a billing company is not a Router rule. The intake question asks whether the clinic bills "either directly or through a billing company" (PRD §21 item 2)
 3. Every result carries `derived_from` field paths and `unresolved_questions[]`
 4. Write the intake and router trace steps
 5. Render the determination and its reasoning readably
 
 **QA gate 3 — the critical checkpoint**
 - [ ] Every golden case's `covered_entity_status`, `ambiguity_cause` and `derived_from` match
-- [ ] G-02 → G-03: one field changed, determination flips
-- [ ] G-06 never returns *neither*
+- [ ] G-02 → G-03: one founder answer changed (four intake fields); determination flips from neither to business associate
+- [ ] G-06 is a business associate with `customers_bill_insurers_electronically` not asked
 - [ ] Unit tests cover each rule branch, including `skipped` vs `not_asked` vs `unknown_to_user`
 - [ ] **If this gate fails at end of Sunday → Phase 6 is cut on Monday**
 
@@ -329,7 +329,7 @@ compliance-copilot/
 
 **QA gate 7**
 - [ ] All green
-- [ ] Breaking a rule on purpose (e.g. G-06 returns *neither*) turns a test red — the tests are actually testing
+- [ ] Breaking a rule on purpose (e.g. G-06, the insurer customer, returns *neither*) turns a test red — the tests are actually testing
 
 ---
 

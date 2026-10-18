@@ -1,0 +1,29 @@
+id: G-02
+title: Consumer wellness app
+stated:
+  product:
+    description: {value: Wellness app sold direct to consumers that tracks symptoms and medications from user entry and a wearable, source: qa_answer, state: answered}
+  hipaa_situation:
+    customer_types: {value: [consumers], source: qa_answer, state: answered}
+    receives_patient_data_from_others: {value: false, source: qa_answer, state: answered}
+    has_signed_agreements_with_healthcare_orgs: {value: false, source: qa_answer, state: answered}
+    bills_insurers_electronically: {value: false, source: qa_answer, state: answered}
+expected:
+  covered_entity_status: neither
+  ambiguity_cause: null
+  derived_from:
+    - stated.hipaa_situation.customer_types
+    - stated.hipaa_situation.receives_patient_data_from_others
+    - stated.hipaa_situation.bills_insurers_electronically
+  framework_summary:
+    HIPAA: out_of_scope
+    HBNR: not_assessed
+    FTC_5: not_assessed
+    WA_MHMDA: not_assessed
+    CT: not_assessed
+    NV: not_assessed
+    TX_NE: not_assessed
+    SOC_2: not_assessed
+    PCI_DSS: not_assessed
+  requirements: []
+  ambiguous_components: null

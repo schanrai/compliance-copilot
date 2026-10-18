@@ -84,6 +84,35 @@ def test_valid_fixture_loads_into_the_models(tmp_path: Path) -> None:
     assert situation.provides_care_directly.state is FieldState.NOT_ASKED
 
 
+def test_receives_clinical_information_defaults_to_not_asked_and_loads_when_answered(
+    tmp_path: Path,
+) -> None:
+    unstated = load_golden_case(write(tmp_path, "unstated.yaml", fixture()))
+    assert (
+        unstated.stated.hipaa_situation.receives_clinical_information.state
+        is FieldState.NOT_ASKED
+    )
+
+    path = "stated.hipaa_situation.receives_clinical_information"
+    answered = load_golden_case(
+        write(
+            tmp_path,
+            "answered.yaml",
+            fixture(
+                stated__hipaa_situation__receives_clinical_information={
+                    "value": False,
+                    "source": "qa_answer",
+                    "state": "answered",
+                },
+                expected__derived_from=[*LOADER_FIXTURE["expected"]["derived_from"], path],
+            ),
+        )
+    )
+    field = answered.stated.hipaa_situation.receives_clinical_information
+    assert (field.state, field.value) == (FieldState.ANSWERED, False)
+    assert path in answered.expected.derived_from
+
+
 def test_directory_load_writes_one_structured_line(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:

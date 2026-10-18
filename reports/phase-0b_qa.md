@@ -2,7 +2,7 @@
 
 **Date:** 2026-10-17
 **Question:** Do the Phase 0 models and harness meet QA gate 0? Can an invalid requirement be constructed? Is the trace append-only? Does the golden-set loader fail loudly on a bad file?
-**Verdict:** Passes every gate-0 check except one, which is blocked: **"All 8 golden cases load"** cannot run because `tests/golden/cases/` holds only `.gitkeep`. No cases were written here. Nothing committed. Waiting for review.
+**Verdict (updated 2026-10-17, after Phase G):** Gate 0 passes. Re-checked once the eight golden cases existed: a fresh directory (`uv sync --frozen`, no `.git` or `.venv`) ran `pytest` with 139 passed; `pip-audit --disable-pip` reported no known vulnerabilities; the eight cases load; the three requirement-rejection tests passed inside that run. A real `git clone` is still impossible until the first commit. The original verdict below was written before the cases existed.
 
 ## Gate 0
 
@@ -10,7 +10,7 @@
 |---|---|
 | Fresh directory → `uv sync --frozen` → `pytest` | **Pass.** 129 passed, 2 skipped. Same method as Phase 0a: copy the tree without `.git` or `.venv`. A real clone would not include this uncommitted work |
 | `pip-audit` clean; versions pinned exactly | **Pass.** `No known vulnerabilities found`, using the Phase 0a audit command. Nothing installed. `pyproject.toml` and `uv.lock` unchanged |
-| All 8 golden cases load and validate | **Blocked on Phase G.** The loader is built and tested on temporary fixtures. `tests/golden/test_golden.py` checks every file in `cases/` and currently reports 2 skips |
+| All 8 golden cases load and validate | **Pass, re-checked after Phase G.** Included in the fresh-directory run: 139 passed |
 | Cited requirement, `modality: required` on a `standard` → rejected | **Pass.** `test_gate0_cited_requirement_with_required_modality_on_a_standard_is_rejected`. Removing the rule turns this test red, so it tests the rule |
 | Derived requirement missing `implication_id` → rejected | **Pass.** `test_gate0_derived_requirement_missing_implication_id_is_rejected` |
 | Requirement with no `evidence_type` → rejected | **Pass.** `test_gate0_requirement_with_no_evidence_type_is_rejected`. The field has no default |
@@ -47,7 +47,7 @@
 
 ## Open issues to decide
 
-1. **G-06 has no field for the billing-company fact.** `customers_bill_insurers_electronically` is a bool, matching the plan's template. A clinic that bills through a billing company looks the same as a clinic that bills no insurer. So "never neither" can only be enforced by treating every clinic `false` as ambiguous. The other option is a three-value answer (`yes` / `no` / `through_billing_company`). This relates to PRD §21 item 2. **Decide before Phase 3.**
+1. **Resolved 2026-10-17 (Phase G).** No billing-company field. The intake question now asks whether the clinic bills insurers "either directly or through a billing company" (PRD §21 item 2). G-06 was then replaced: it is software sold to a health insurer, not the billing-company case. Original note: `customers_bill_insurers_electronically` is a bool, so a clinic that bills through a billing company looked the same as one that bills no insurer.
 2. **The derived requirement has nothing to derive from.** Check 3 says `derived_from` must point at a cited requirement in the same analysis. The prototype cites only 164.312(b), not 164.404(b) or 164.410(b). Phase 6 will fail check 3 unless one of these happens:
    - Phase 5 or 6 also emits a cited requirement for the breach-notification clause, or
    - the decision is logged as a PRD §21 item.

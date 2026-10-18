@@ -1,0 +1,27 @@
+id: G-08
+title: Founder provides care and bills insurers
+stated:
+  product:
+    description: {value: The founder's company provides care directly and bills insurers electronically, source: qa_answer, state: answered}
+  hipaa_situation:
+    provides_care_directly: {value: true, source: qa_answer, state: answered}
+    bills_insurers_electronically: {value: true, source: qa_answer, state: answered}
+expected:
+  covered_entity_status: covered_entity
+  ambiguity_cause: null
+  derived_from:
+    - stated.hipaa_situation.provides_care_directly
+    - stated.hipaa_situation.bills_insurers_electronically
+  framework_summary:
+    HIPAA: in_scope
+    HBNR: not_assessed
+    FTC_5: not_assessed
+    WA_MHMDA: not_assessed
+    CT: not_assessed
+    NV: not_assessed
+    TX_NE: not_assessed
+    SOC_2: not_assessed
+    PCI_DSS: not_assessed
+  requirements:
+    - {citation: 45-CFR-164.312-b, evidence_type: cited, clause_type: standard, modality: null}
+  ambiguous_components: null

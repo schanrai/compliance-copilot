@@ -1,0 +1,29 @@
+id: G-05
+title: Clinic-facing tool, clinic billing unknown
+stated:
+  product:
+    description: {value: "Tool sold to clinics that receives and stores the clinics' patient records, including clinical information", source: qa_answer, state: answered}
+  hipaa_situation:
+    customer_types: {value: [clinics], source: qa_answer, state: answered}
+    customers_bill_insurers_electronically: {source: qa_answer, state: unknown_to_user}
+    receives_patient_data_from_others: {value: true, source: qa_answer, state: answered}
+    receives_clinical_information: {value: true, source: qa_answer, state: answered}
+expected:
+  covered_entity_status: ambiguous
+  ambiguity_cause: missing_fact
+  derived_from:
+    - stated.hipaa_situation.customer_types
+    - stated.hipaa_situation.customers_bill_insurers_electronically
+    - stated.hipaa_situation.receives_patient_data_from_others
+  framework_summary:
+    HIPAA: unresolved
+    HBNR: not_assessed
+    FTC_5: not_assessed
+    WA_MHMDA: not_assessed
+    CT: not_assessed
+    NV: not_assessed
+    TX_NE: not_assessed
+    SOC_2: not_assessed
+    PCI_DSS: not_assessed
+  requirements: []
+  ambiguous_components: [1, 2, 3, 4, 6]
