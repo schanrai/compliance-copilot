@@ -89,6 +89,7 @@ def ambiguous_output(
     if not isinstance(description, str):
         raise ValueError("product description is missing")
     detail = " ".join(determination.unresolved_questions)
+    ended = description if description[-1:] in ".?!" else f"{description}."
     return AmbiguousOutput(
         what_is_unresolved=f"Are you a {subject}?",
         why_unresolved=_WHY[cause],
@@ -103,7 +104,7 @@ def ambiguous_output(
         ),
         build_regardless=_NEXT,
         counsel_question=(
-            f"We are building this product: {description} Under 45 CFR 160.103, "
+            f"We are building this product: {ended} Under 45 CFR 160.103, "
             f"are we a {subject}? {detail} Expect about 30 minutes with a healthcare "
             "privacy lawyer."
         ),

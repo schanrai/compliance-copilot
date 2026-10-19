@@ -27,7 +27,7 @@ A signed agreement is never an input. Billing through a billing company is not a
 ## Limits
 
 - A settled covered-entity or business-associate result is not downgraded when the other branch is open. A determined result cannot carry an unresolved question. A founder who is a clear business associate, and who also might be a covered entity, is reported as a business associate.
-- A subcontractor customer makes the result `requires_document_we_cannot_see` only when no customer is a settled covered entity. A health plan in the same list settles business-associate status.
+- A subcontractor customer makes the result `missing_fact` when no customer is a settled covered entity: whether the end providers bill insurers is not in the intake. A health plan in the same list settles business-associate status. Updated 2026-10-19 (`reports/g-07_missing_fact.md`).
 - Employers are not read as group health plans. Clearinghouses, and a founder who is themselves a health plan, are not in the intake.
 - When more than one cause is present, `missing_fact` wins, then a document the tool cannot see, then a contested question.
 

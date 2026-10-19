@@ -292,24 +292,52 @@ def test_an_open_clinical_fact_does_not_change_the_subcontractor_cause(
         receives_clinical_information=gap(state),
     )
 
-    assert (status, cause) == (Status.AMBIGUOUS, Cause.REQUIRES_DOCUMENT_WE_CANNOT_SEE)
+    assert (status, cause) == (Status.AMBIGUOUS, Cause.MISSING_FACT)
     assert CLINICAL not in paths
+    assert CUSTOMERS_BILL in paths
 
 
-def test_a_subcontractor_customer_needs_a_document_the_tool_cannot_see() -> None:
+def test_a_subcontractor_customer_is_missing_whether_the_end_providers_bill() -> None:
+    fields = dict(
+        customer_types=answered((CustomerType.COMPANIES_HANDLING_PATIENT_DATA_FOR_PROVIDERS,)),
+        customers_bill_insurers_electronically=gap(FieldState.UNKNOWN_TO_USER),
+        receives_patient_data_from_others=answered(True),
+        receives_clinical_information=answered(True),
+    )
+    status, cause, paths = status_of(**fields)
+    question = questions_of(**fields)[0]
+
+    assert (status, cause) == (Status.AMBIGUOUS, Cause.MISSING_FACT)
+    assert paths == (CUSTOMERS, CUSTOMERS_BILL, RECEIVES)
+    assert CLINICAL not in paths
+    assert "You don't know whether the healthcare providers your customer serves bill insurers" in question
+    assert "contracts" not in question
+
+
+def test_end_providers_that_bill_make_a_business_associate() -> None:
     status, cause, paths = status_of(
         customer_types=answered((CustomerType.COMPANIES_HANDLING_PATIENT_DATA_FOR_PROVIDERS,)),
+        customers_bill_insurers_electronically=answered(True),
         receives_patient_data_from_others=answered(True),
         receives_clinical_information=answered(True),
     )
 
-    assert (status, cause) == (Status.AMBIGUOUS, Cause.REQUIRES_DOCUMENT_WE_CANNOT_SEE)
-    assert paths == (CUSTOMERS, RECEIVES, CLINICAL)
-    assert "contracts" in questions_of(
+    assert (status, cause) == (Status.BUSINESS_ASSOCIATE, None)
+    assert paths == (CUSTOMERS, CUSTOMERS_BILL, RECEIVES, CLINICAL)
+
+
+def test_end_providers_that_do_not_bill_are_not_covered_entities() -> None:
+    status, cause, paths = status_of(
         customer_types=answered((CustomerType.COMPANIES_HANDLING_PATIENT_DATA_FOR_PROVIDERS,)),
+        customers_bill_insurers_electronically=answered(False),
         receives_patient_data_from_others=answered(True),
         receives_clinical_information=answered(True),
-    )[0]
+        bills_insurers_electronically=answered(False),
+    )
+
+    assert (status, cause) == (Status.NEITHER, None)
+    assert CUSTOMERS_BILL in paths
+    assert CLINICAL not in paths
 
 
 def test_a_settled_covered_customer_is_a_business_associate_despite_a_subcontractor() -> None:

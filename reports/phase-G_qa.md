@@ -47,3 +47,5 @@ None open. Resolved during the session:
 ## Follow-up 2026-10-19
 
 G-04 relabelled to business associate. The 2026-10-17 disagreement is reversed: appointment data linked to a named person is PHI under 45 CFR 160.103. See `reports/g-04_phi.md`. The table above is the Gate G snapshot and is not rewritten.
+
+G-07 relabelled to `missing_fact` on whether the end providers bill insurers. See `reports/g-07_missing_fact.md`. After this, no golden case produces `requires_document_we_cannot_see` or `contested_question`.

@@ -18,8 +18,10 @@ the customer's status has to be settled first.
 - Health-plan customers (`insurers`) are covered entities by definition.
   Their row does not read the clinic-billing field, whatever state it is in.
 - A customer that handles patient data for providers is a subcontractor
-  question. When no customer is a settled covered entity, that is ambiguous
-  because it turns on contracts the founder is not a party to.
+  question. When no customer is a settled covered entity, that is
+  missing_fact: whether the providers that customer serves bill insurers
+  electronically is not in the intake. A contract with those providers does
+  not decide the status.
 - Consumers and employers are not covered entities. An employer is not read
   as a group health plan.
 
@@ -78,6 +80,10 @@ _NOT_COVERED_CUSTOMERS = frozenset({CustomerType.CONSUMERS, CustomerType.EMPLOYE
 _CLINIC_BILLING = (
     "whether the clinic you sell to bills insurers electronically, "
     "either directly or through a billing company"
+)
+_END_PROVIDER_BILLING = (
+    "whether the healthcare providers your customer serves bill insurers "
+    "electronically, either directly or through a billing company"
 )
 
 _BUSINESS_ASSOCIATE_DEF = "45-CFR-160.103-def-business-associate"
@@ -381,33 +387,60 @@ def _on_behalf_of_covered_entity(
 def _subcontractor(situation: HipaaSituation) -> _Branch:
     """No settled covered entity, and the customer type is the subcontractor.
 
-    Clinical information does not settle the customer's contracts, so only an
-    answered yes or no is cited.
+    The billing field here is whether the providers that customer serves are
+    covered entities. That is the same hole as clinic billing, one hop out.
+    Clinical information does not settle an open billing fact, so it is only
+    cited when billing is answered.
     """
 
-    paths = [CUSTOMERS, RECEIVES]
+    billing = _bool_fact(situation, CUSTOMERS_BILL)
     clinical = _bool_fact(situation, CLINICAL)
-    if clinical.state is FieldState.ANSWERED:
-        paths.append(CLINICAL)
     data = "clinical information" if _is_yes(clinical) else "patient data"
-    return _Branch(
-        _Kind.OPEN,
-        paths=tuple(paths),
-        cause=AmbiguityCause.REQUIRES_DOCUMENT_WE_CANNOT_SEE,
-        questions=(
-            "Whether your customer is a business associate of the providers it "
-            "serves depends on that customer's contracts with those providers. You "
-            "are not a party to those contracts, and another intake question cannot "
-            "settle it.",
+    clauses = (*_ASSOCIATE_CLAUSES, _HEALTH_CARE_PROVIDER_DEF, _TRANSACTION_DEF)
+    if _is_yes(billing):
+        paths = [CUSTOMERS, CUSTOMERS_BILL, RECEIVES]
+        if clinical.state is FieldState.ANSWERED:
+            paths.append(CLINICAL)
+        return _Branch(
+            _Kind.APPLIES,
+            paths=tuple(paths),
+            rationale=(
+                "The healthcare providers your customer serves bill insurers "
+                "electronically, either directly or through a billing company, so "
+                "those providers are covered entities. "
+                f"You receive {data} for a customer that handles patient data for "
+                "them, so you handle protected health information on their behalf. "
+                "You are a business associate under 45 CFR 160.103."
+            ),
+            clauses=(*clauses, *_PHI_CLAUSES),
+        )
+    if _is_no(billing):
+        return _Branch(
+            _Kind.DOES_NOT,
+            paths=(CUSTOMERS, CUSTOMERS_BILL, RECEIVES),
+            rationale=(
+                "The healthcare providers your customer serves do not bill insurers "
+                "electronically, so they are not covered entities under this rule. "
+                "You are not a business associate of them."
+            ),
+            clauses=clauses,
+        )
+    return _gap(
+        (CUSTOMERS, CUSTOMERS_BILL, RECEIVES),
+        _question_for(
+            billing.state,
+            _END_PROVIDER_BILLING,
+            "whether those providers are covered entities, and therefore whether "
+            "you act for a covered entity",
         ),
-        rationale=(
+        (
             f"You receive {data} for a customer that handles patient data for "
-            "providers. Whether that customer is a business associate depends on "
-            "its contracts with those providers. You are not a party to those "
-            "contracts, and another intake question cannot settle it, so this "
+            "providers. Whether those providers are covered entities depends on "
+            "whether they bill insurers electronically, either directly or through "
+            "a billing company. That fact is not in the intake, so this "
             "determination is unresolved."
         ),
-        clauses=(_BUSINESS_ASSOCIATE_DEF,),
+        clauses=clauses,
     )
 
 

@@ -21,7 +21,7 @@ from compliance_copilot.models import (
     TraceStep,
 )
 from compliance_copilot.router.determine import CoveredEntityDecision
-from compliance_copilot.router.paths import FIELD_LABELS, field_at
+from compliance_copilot.router.paths import field_at, label_for
 
 _CAPTURED = "intake-captured"
 _UNKNOWN = "intake-unknown"
@@ -122,7 +122,7 @@ def _intake(
 
 
 def _label(stated: StatedFacts, path: str) -> str:
-    label = FIELD_LABELS[path]
+    label = label_for(stated, path)
     state = field_at(stated, path).state
     if state is FieldState.NOT_ASKED:
         return f"{label} (not asked)"

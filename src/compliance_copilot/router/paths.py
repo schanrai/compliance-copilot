@@ -7,7 +7,7 @@ rules never read it and it never appears in `derived_from`.
 
 from __future__ import annotations
 
-from compliance_copilot.models import CustomerType, Field, StatedFacts
+from compliance_copilot.models import CustomerType, Field, FieldState, StatedFacts
 
 CUSTOMERS = "stated.hipaa_situation.customer_types"
 CUSTOMERS_BILL = "stated.hipaa_situation.customers_bill_insurers_electronically"
@@ -29,6 +29,32 @@ FIELD_LABELS: dict[str, str] = {
     BILLS: "Whether you bill insurers electronically",
     CARE: "Whether you provide care directly",
 }
+
+_END_PROVIDER_BILLING_LABEL = (
+    "Whether the healthcare providers your customer serves bill insurers electronically"
+)
+
+
+def asks_end_provider_billing(stated: StatedFacts) -> bool:
+    """The billing field asks about the clinics behind a middle-company customer."""
+
+    customers = stated.hipaa_situation.customer_types
+    if customers.state is not FieldState.ANSWERED or customers.value is None:
+        return False
+    types = set(customers.value)
+    return (
+        CustomerType.COMPANIES_HANDLING_PATIENT_DATA_FOR_PROVIDERS in types
+        and CustomerType.CLINICS not in types
+        and CustomerType.INSURERS not in types
+    )
+
+
+def label_for(stated: StatedFacts, path: str) -> str:
+    """Founder-facing name of a cited field. The billing field depends on who the customer is."""
+
+    if path == CUSTOMERS_BILL and asks_end_provider_billing(stated):
+        return _END_PROVIDER_BILLING_LABEL
+    return FIELD_LABELS[path]
 
 CUSTOMER_LABELS: dict[CustomerType, str] = {
     CustomerType.CLINICS: "clinics",

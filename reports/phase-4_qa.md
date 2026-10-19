@@ -9,7 +9,7 @@
 | Check | Result |
 |---|---|
 | Golden framework summaries match | **Pass.** HIPAA follows the determination. HBNR, FTC Act §5, Washington, Connecticut, Nevada, Texas and Nebraska, SOC 2, and PCI DSS are not assessed |
-| Ambiguous cases have components 1–4 and 6, and the counsel question is pasteable | **Pass.** G-05 and G-07. The question cites 45 CFR 160.103, includes the product description, and names about 30 minutes. Settled cases produce none of this. G-04 was relabelled business associate the same day (`reports/g-04_phi.md`), so it is no longer an ambiguous case |
+| Ambiguous cases have components 1–4 and 6, and the counsel question is pasteable | **Pass.** G-05 and G-07, both `missing_fact`. The question cites 45 CFR 160.103, includes the product description, and names about 30 minutes. Settled cases produce none of this. G-04 was relabelled business associate the same day (`reports/g-04_phi.md`). G-07 was relabelled from `requires_document_we_cannot_see` the same day (`reports/g-07_missing_fact.md`) |
 | Unresolved and not assessed render differently | **Pass.** Unresolved says "we looked and could not settle it." Not assessed says "we did not look." The styles differ |
 
 Component 5 is on the ambiguous panel as "Specified, next." It is not filled in.

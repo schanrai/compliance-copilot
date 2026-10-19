@@ -240,6 +240,13 @@ def test_determinations_print_the_status_and_the_reasoning() -> None:
     assert "you don't know" in missing
     assert "Missing a fact" in missing
 
+    subcontractor = _text("g-07.yaml")
+    assert "Do the healthcare providers your customer serves bill insurers electronically, either directly or through a billing company?" in subcontractor
+    assert "you don't know" in subcontractor
+    assert "because your customers are companies" not in subcontractor
+    assert "Missing a fact" in subcontractor
+    assert "You don't know whether the healthcare providers your customer serves bill insurers" in subcontractor
+
 
 def test_determine_command_prints_a_golden_case(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("LOG_LEVEL", "INFO")

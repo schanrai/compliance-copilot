@@ -22,7 +22,13 @@ from compliance_copilot.models import (
     StatedFacts,
 )
 from compliance_copilot.router.determine import CoveredEntityDecision
-from compliance_copilot.router.paths import FIELD_LABELS, customer_phrase, field_at
+from compliance_copilot.router.paths import (
+    FIELD_LABELS,
+    asks_end_provider_billing,
+    customer_phrase,
+    field_at,
+    label_for,
+)
 
 
 class RenderError(ValueError):
@@ -51,6 +57,10 @@ _ADVISORY = (
 # determination does not use, so a not-asked question is visible.
 _CLINIC_BILLING_QUESTION = (
     "Does the clinic you sell to bill insurers electronically, "
+    "either directly or through a billing company?"
+)
+_END_PROVIDER_BILLING_QUESTION = (
+    "Do the healthcare providers your customer serves bill insurers electronically, "
     "either directly or through a billing company?"
 )
 
@@ -94,10 +104,14 @@ def intake_panel(stated: StatedFacts, *, case_id: str, title: str) -> Panel:
 
 
 def _intake_line(stated: StatedFacts, name: str, label: str, field: Field[object]) -> str:
-    """One intake row. The clinic-billing question is only worded that way for clinics."""
+    """One intake row. The billing question names who would be the covered entity."""
 
-    if name != "customers_bill_insurers_electronically" or _customers_include_clinics(stated):
+    if name != "customers_bill_insurers_electronically":
         return f"{label}: {_format_value(field)}"
+    if _customers_include_clinics(stated):
+        return f"{label}: {_format_value(field)}"
+    if asks_end_provider_billing(stated):
+        return f"{_END_PROVIDER_BILLING_QUESTION}: {_format_value(field)}"
     customers = stated.hipaa_situation.customer_types
     if (
         customers.state is FieldState.ANSWERED
@@ -142,7 +156,7 @@ def determination_panel(
         Text("Answers this used", style="bold"),
     ]
     for path in determination.derived_from:
-        body.append(Text(f"• {FIELD_LABELS[path]}: {_format_value(field_at(stated, path))}"))
+        body.append(Text(f"• {label_for(stated, path)}: {_format_value(field_at(stated, path))}"))
     body.extend([Text(""), Text("Regulation this applied", style="bold")])
     for clause in clauses:
         url = str(clause.source_url)
