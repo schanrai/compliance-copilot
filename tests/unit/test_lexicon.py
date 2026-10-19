@@ -19,6 +19,10 @@ def test_shipped_lexicon_is_the_allowed_nest() -> None:
         "individually identifiable health information",
         "health data",
     )
+    assert by_term["individually identifiable health information"].narrower_than == (
+        "health information",
+    )
+    assert by_term["health information"].narrower_than == ()
     assert by_term["electronic protected health information"].aliases == (
         "ePHI",
         "electronic PHI",
@@ -31,6 +35,21 @@ def test_longer_term_hides_the_term_inside_it() -> None:
     )
 
     assert found == {"electronic protected health information", "health data"}
+
+
+def test_health_information_is_not_also_found_inside_the_electronic_term() -> None:
+    found = load_lexicon().terms_in("electronic protected health information")
+
+    assert found == {"electronic protected health information"}
+
+
+def test_health_information_is_broader_than_electronic_protected_health_information() -> None:
+    pairs = load_lexicon().broader_uses(
+        "record health information",
+        ("electronic protected health information",),
+    )
+
+    assert pairs == [("health information", "electronic protected health information")]
 
 
 def test_health_data_is_broader_than_electronic_protected_health_information() -> None:

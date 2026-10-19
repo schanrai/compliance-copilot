@@ -20,9 +20,12 @@ from compliance_copilot.corpus.models import ScopeFilter
 from compliance_copilot.golden.loader import GoldenCaseError, load_golden_case
 from compliance_copilot.log import configure_logging
 from compliance_copilot.models import Framework
+from compliance_copilot.output.ambiguous import ambiguous_output
 from compliance_copilot.render.clause import clause_panel
 from compliance_copilot.render.determination import determination_panel, intake_panel
-from compliance_copilot.router import RunError, run_determination
+from compliance_copilot.render.summary import ambiguous_panel, summary_panel
+from compliance_copilot.router import RunError, decision_clauses, run_determination
+from compliance_copilot.router.summary import framework_summary
 
 app = typer.Typer(no_args_is_help=True, add_completion=False)
 console = Console()
@@ -71,11 +74,17 @@ def determine(
     try:
         loaded = load_golden_case(case)
         run = run_determination(loaded.stated, analysis_id=loaded.id)
-    except (GoldenCaseError, RunError) as exc:
+        applied = decision_clauses(run.decision, default_corpus())
+    except (GoldenCaseError, RunError, ClauseNotFoundError) as exc:
         out.print(f"[red]{exc}[/red]")
         raise typer.Exit(code=1) from exc
     out.print(intake_panel(loaded.stated, case_id=loaded.id, title=loaded.title))
-    out.print(determination_panel(loaded.stated, run.decision))
+    out.print(determination_panel(loaded.stated, run.decision, applied))
+    summary = framework_summary(run.decision)
+    out.print(summary_panel(summary))
+    unresolved = ambiguous_output(loaded.stated, run.decision)
+    if unresolved is not None:
+        out.print(ambiguous_panel(unresolved))
     out.print(f"{loaded.id}: {run.decision.determination.value.value}")
 
 

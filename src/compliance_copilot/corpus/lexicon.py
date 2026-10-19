@@ -4,6 +4,7 @@ A requirement is rejected when its wording uses a term this file marks as
 broader than a lexicon term inside one of the cited clause's operative
 terms. The chain is transitive: health data is broader than protected health
 information, which is broader than electronic protected health information.
+Health information sits at the top of the 160.103 nest.
 
 Matches are case-insensitive. A longer term wins over a term inside it, so
 "electronic protected health information" is not also a use of "protected

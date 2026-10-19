@@ -23,12 +23,14 @@ the customer's status has to be settled first.
 - Consumers and employers are not covered entities. An employer is not read
   as a group health plan.
 
-`receives_clinical_information` is read only after a covered-entity customer
-and received patient data are both established. Yes cites the field. No is
-the contested protected-health-information question (scheduling details
-only). Not asked does not block: G-03 and G-06 are business associates
-without it. Skipped and unknown_to_user are missing facts, and they are not
-collapsed into no.
+`receives_clinical_information` does not change the status. Information a
+covered entity holds that relates to the provision of health care to an
+identifiable person is individually identifiable health information, so
+scheduling details alone are protected health information. Yes and no are
+both cited, because the rationale explains each. Not asked, skipped, and
+unknown_to_user are left out of `derived_from`: no answer would change the
+result. Whether a product only passes data through (the conduit exception)
+is not asked; the prototype treats received data as maintained.
 
 When more than one cause is present, missing_fact wins, then a document the
 tool cannot see, then a contested question. A settled covered entity or
@@ -42,11 +44,14 @@ Signed agreements are not read.
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from dataclasses import dataclass
 from enum import StrEnum
 
+from compliance_copilot.corpus.loader import Corpus
 from compliance_copilot.models import (
     AmbiguityCause,
+    Clause,
     CoveredEntityStatus,
     CustomerType,
     Determination,
@@ -74,6 +79,31 @@ _CLINIC_BILLING = (
     "whether the clinic you sell to bills insurers electronically, "
     "either directly or through a billing company"
 )
+
+_BUSINESS_ASSOCIATE_DEF = "45-CFR-160.103-def-business-associate"
+_COVERED_ENTITY_DEF = "45-CFR-160.103-def-covered-entity"
+_HEALTH_CARE_PROVIDER_DEF = "45-CFR-160.103-def-health-care-provider"
+_HEALTH_PLAN_DEF = "45-CFR-160.103-def-health-plan"
+_HEALTH_INFORMATION_DEF = "45-CFR-160.103-def-health-information"
+_IIHI_DEF = "45-CFR-160.103-def-individually-identifiable-health-information"
+_PHI_DEF = "45-CFR-160.103-def-protected-health-information"
+_TRANSACTION_DEF = "45-CFR-160.103-def-transaction"
+_CLAUSE_ORDER = (
+    _COVERED_ENTITY_DEF,
+    _HEALTH_CARE_PROVIDER_DEF,
+    _HEALTH_PLAN_DEF,
+    _TRANSACTION_DEF,
+    _BUSINESS_ASSOCIATE_DEF,
+    _HEALTH_INFORMATION_DEF,
+    _IIHI_DEF,
+    _PHI_DEF,
+)
+"""Every clause the router relies on, in reading order. Each must resolve in the corpus."""
+
+_OWN_CLAUSES = (_COVERED_ENTITY_DEF, _HEALTH_CARE_PROVIDER_DEF, _TRANSACTION_DEF)
+_ASSOCIATE_CLAUSES = (_BUSINESS_ASSOCIATE_DEF, _COVERED_ENTITY_DEF)
+_PHI_CLAUSES = (_HEALTH_INFORMATION_DEF, _IIHI_DEF, _PHI_DEF)
+
 _CAUSE_RANK = {
     AmbiguityCause.MISSING_FACT: 0,
     AmbiguityCause.REQUIRES_DOCUMENT_WE_CANNOT_SEE: 1,
@@ -106,14 +136,28 @@ class _Branch:
     cause: AmbiguityCause | None = None
     questions: tuple[str, ...] = ()
     rationale: str = ""
+    clauses: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
 class CoveredEntityDecision:
-    """A determination and the founder-facing reasoning that produced it."""
+    """A determination, the founder-facing reasoning, and the clauses that reasoning applies.
+
+    `clauses` are corpus clause ids, never text. The rationale paraphrases them.
+    """
 
     determination: Determination
     rationale: str
+    clauses: tuple[str, ...]
+
+
+ROUTER_CLAUSE_IDS: tuple[str, ...] = _CLAUSE_ORDER
+
+
+def decision_clauses(decision: CoveredEntityDecision, corpus: Corpus) -> tuple[Clause, ...]:
+    """The corpus clauses behind `decision`. Raises `ClauseNotFoundError` for a missing id."""
+
+    return tuple(corpus.clause(clause_id) for clause_id in decision.clauses)
 
 
 def determine(stated: StatedFacts) -> CoveredEntityDecision:
@@ -157,6 +201,7 @@ def _own_covered_entity(situation: HipaaSituation) -> _Branch:
             _Kind.DOES_NOT,
             paths=tuple(fact.path for fact in falses),
             rationale=_own_negative_rationale(falses),
+            clauses=_OWN_CLAUSES,
         )
     if _is_yes(care) and _is_yes(bills):
         return _Branch(
@@ -168,6 +213,7 @@ def _own_covered_entity(situation: HipaaSituation) -> _Branch:
                 "electronic form in connection with a covered transaction "
                 "(45 CFR 160.103). You are a covered entity."
             ),
+            clauses=_OWN_CLAUSES,
         )
     if care.state is FieldState.NOT_ASKED and bills.state is FieldState.NOT_ASKED:
         return _Branch(_Kind.NOT_CONSIDERED)
@@ -182,6 +228,7 @@ def _own_covered_entity(situation: HipaaSituation) -> _Branch:
             "billing insurers electronically. The intake does not settle that, so "
             "this determination is unresolved."
         ),
+        clauses=_OWN_CLAUSES,
     )
 
 
@@ -213,6 +260,7 @@ def _business_associate(situation: HipaaSituation) -> _Branch:
                 "maintaining, or transmitting protected health information on their "
                 "behalf. You are not a business associate."
             ),
+            clauses=(_BUSINESS_ASSOCIATE_DEF,),
         )
     if set(types) <= _NOT_COVERED_CUSTOMERS:
         # `receives` no already returned above. Yes is cited and does not make
@@ -231,6 +279,7 @@ def _business_associate(situation: HipaaSituation) -> _Branch:
                 "are not covered entities, so you are not a business associate of them."
                 f"{received}"
             ),
+            clauses=_ASSOCIATE_CLAUSES,
         )
     if not _is_yes(receives):
         return _gap(
@@ -252,8 +301,8 @@ def _business_associate(situation: HipaaSituation) -> _Branch:
         return _gap(
             (CUSTOMERS, CUSTOMERS_BILL, RECEIVES),
             _clinic_billing_question(situation.customers_bill_insurers_electronically.state),
-            "You receive patient data from clinic customers. Whether those clinics "
-            "are covered entities depends on whether they bill insurers "
+            "You receive patient data from the clinic you sell to. Whether that clinic "
+            "is a covered entity depends on whether it bills insurers "
             "electronically, either directly or through a billing company. That "
             "fact is not in the intake, so this determination is unresolved.",
         )
@@ -266,10 +315,11 @@ def _business_associate(situation: HipaaSituation) -> _Branch:
         _Kind.DOES_NOT,
         paths=tuple(paths),
         rationale=(
-            "Your clinic customers do not bill insurers electronically, so they "
-            "are not covered entities under this rule. You are not their business "
+            "The clinic you sell to does not bill insurers electronically, so it "
+            "is not a covered entity under this rule. You are not its business "
             "associate."
         ),
+        clauses=(*_ASSOCIATE_CLAUSES, _HEALTH_CARE_PROVIDER_DEF, _TRANSACTION_DEF),
     )
 
 
@@ -302,8 +352,8 @@ def _on_behalf_of_covered_entity(
 ) -> _Branch:
     """The customer is a covered entity and the product receives their data.
 
-    Clinical information is consulted here and not before. Not asked is left
-    out of `derived_from`. No is the contested question. Yes is cited.
+    Clinical information does not change the status. An answered yes or no is
+    cited, because the rationale explains it. Any other state is left out.
     """
 
     paths = [CUSTOMERS]
@@ -311,54 +361,32 @@ def _on_behalf_of_covered_entity(
         paths.append(CUSTOMERS_BILL)
     paths.append(RECEIVES)
     clinical = _bool_fact(situation, CLINICAL)
-    if clinical.state is FieldState.ANSWERED and clinical.value is False:
+    if clinical.state is FieldState.ANSWERED:
         paths.append(CLINICAL)
-        return _Branch(
-            _Kind.OPEN,
-            paths=tuple(paths),
-            cause=AmbiguityCause.CONTESTED_QUESTION,
-            questions=(
-                "Whether names, appointment times, and provider identity, without "
-                "diagnoses, clinical notes, or test results, are protected health "
-                "information under 45 CFR 160.103. The facts are known, and this "
-                "legal question is not settled.",
-            ),
-            rationale=_contested_rationale(types),
-        )
-    if clinical.state in (FieldState.SKIPPED, FieldState.UNKNOWN_TO_USER):
-        paths.append(CLINICAL)
-        return _gap(
-            tuple(paths),
-            _gap_question(clinical),
-            "You receive patient data from a covered entity. Whether that data is "
-            "clinical information or only scheduling details is not in the intake, "
-            "so this determination is unresolved.",
-        )
-    if _is_yes(clinical):
-        paths.append(CLINICAL)
+    clauses = [*_ASSOCIATE_CLAUSES, *_PHI_CLAUSES]
+    if clinics_are_covered:
+        clauses.extend((_HEALTH_CARE_PROVIDER_DEF, _TRANSACTION_DEF))
+    if _HEALTH_PLAN in types:
+        clauses.append(_HEALTH_PLAN_DEF)
     return _Branch(
         _Kind.APPLIES,
         paths=tuple(paths),
         rationale=_associate_rationale(
-            types, clinics_are_covered=clinics_are_covered, clinical_yes=_is_yes(clinical)
+            types, clinics_are_covered=clinics_are_covered, clinical=clinical
         ),
+        clauses=tuple(clauses),
     )
 
 
 def _subcontractor(situation: HipaaSituation) -> _Branch:
-    """No settled covered entity, and the customer type is the subcontractor."""
+    """No settled covered entity, and the customer type is the subcontractor.
+
+    Clinical information does not settle the customer's contracts, so only an
+    answered yes or no is cited.
+    """
 
     paths = [CUSTOMERS, RECEIVES]
     clinical = _bool_fact(situation, CLINICAL)
-    if clinical.state in (FieldState.SKIPPED, FieldState.UNKNOWN_TO_USER):
-        paths.append(CLINICAL)
-        return _gap(
-            tuple(paths),
-            _gap_question(clinical),
-            "You receive patient data for a customer that handles patient data for "
-            "providers. Whether that data is clinical information is not in the "
-            "intake, so this determination is unresolved.",
-        )
     if clinical.state is FieldState.ANSWERED:
         paths.append(CLINICAL)
     data = "clinical information" if _is_yes(clinical) else "patient data"
@@ -379,6 +407,7 @@ def _subcontractor(situation: HipaaSituation) -> _Branch:
             "contracts, and another intake question cannot settle it, so this "
             "determination is unresolved."
         ),
+        clauses=(_BUSINESS_ASSOCIATE_DEF,),
     )
 
 
@@ -398,7 +427,7 @@ def _own_negative_rationale(falses: list[_Fact]) -> str:
 
 
 def _associate_rationale(
-    types: tuple[CustomerType, ...], *, clinics_are_covered: bool, clinical_yes: bool
+    types: tuple[CustomerType, ...], *, clinics_are_covered: bool, clinical: _Fact
 ) -> str:
     sentences: list[str] = []
     if clinics_are_covered:
@@ -419,10 +448,22 @@ def _associate_rationale(
                 "entity under 45 CFR 160.103, so the clinic-billing question is "
                 "not asked."
             )
-    if clinical_yes:
+    if _is_yes(clinical):
         sentences.append(
             "You receive patient data from them, including clinical information, "
             "so you handle protected health information on their behalf."
+        )
+    elif _is_no(clinical):
+        sentences.append(
+            "You receive patient data from them: scheduling details, without "
+            "diagnoses, clinical notes, or test results. Under 45 CFR 160.103, "
+            "health information includes information that relates to the provision "
+            "of health care to a person. When a health care provider or health "
+            "plan creates or receives that information, and it identifies the "
+            "person, it is individually identifiable health information. A "
+            "diagnosis is not required: an appointment with a provider is the "
+            "provision of health care. Held or sent electronically, it is "
+            "protected health information, and you handle it on their behalf."
         )
     else:
         sentences.append(
@@ -432,31 +473,19 @@ def _associate_rationale(
     return " ".join(sentences)
 
 
-def _contested_rationale(types: tuple[CustomerType, ...]) -> str:
-    parts: list[str] = []
-    if _PROVIDER in types:
-        parts.append(
-            "your clinic customers bill insurers electronically, so they are covered entities"
-        )
-    if _HEALTH_PLAN in types:
-        parts.append("your customer includes a health plan, which is a covered entity")
-    lead = ", and ".join(parts)
-    return (
-        f"{lead[0].upper()}{lead[1:]}, and you receive patient data from them. "
-        "That data is scheduling details only: names, appointment times, and "
-        "provider identity, not diagnoses, clinical notes, or test results. "
-        "Whether that is protected health information under 45 CFR 160.103 is "
-        "not settled, so this determination is unresolved."
-    )
-
-
-def _gap(paths: tuple[str, ...], question: str, rationale: str) -> _Branch:
+def _gap(
+    paths: tuple[str, ...],
+    question: str,
+    rationale: str,
+    clauses: tuple[str, ...] = _ASSOCIATE_CLAUSES,
+) -> _Branch:
     return _Branch(
         _Kind.OPEN,
         paths=paths,
         cause=AmbiguityCause.MISSING_FACT,
         questions=(question,),
         rationale=rationale,
+        clauses=clauses,
     )
 
 
@@ -504,11 +533,6 @@ _GAP_COPY: dict[str, tuple[str, str]] = {
         "whether your product receives patient data from someone else",
         "whether you handle protected health information on a customer's behalf",
     ),
-    CLINICAL: (
-        "whether your product receives clinical information, such as diagnoses, "
-        "clinical notes, or test results, or only scheduling details",
-        "whether the data is protected health information or a contested question",
-    ),
 }
 
 
@@ -520,12 +544,20 @@ def _open_decision(opens: list[_Branch]) -> CoveredEntityDecision:
     paths: list[str] = []
     questions: list[str] = []
     rationales: list[str] = []
+    clauses: list[str] = []
     for branch in chosen:
         paths.extend(branch.paths)
         questions.extend(branch.questions)
+        clauses.extend(branch.clauses)
         if branch.rationale:
             rationales.append(branch.rationale)
-    return _ambiguous(cause, ordered(paths), tuple(dict.fromkeys(questions)), " ".join(rationales))
+    return _ambiguous(
+        cause,
+        ordered(paths),
+        tuple(dict.fromkeys(questions)),
+        " ".join(rationales),
+        clauses,
+    )
 
 
 def _neither(own: _Branch, associate: _Branch) -> CoveredEntityDecision:
@@ -535,6 +567,7 @@ def _neither(own: _Branch, associate: _Branch) -> CoveredEntityDecision:
             _Kind.DOES_NOT,
             paths=ordered((*associate.paths, *own.paths)),
             rationale=f"{own.rationale} {associate.rationale}",
+            clauses=(*own.clauses, *associate.clauses),
         ),
     )
 
@@ -553,6 +586,7 @@ def _customers_were_not_asked(own: _Branch) -> CoveredEntityDecision:
         own.rationale
         + " Who your customers are was not asked, so business-associate status "
         "is unresolved.",
+        (*own.clauses, *_ASSOCIATE_CLAUSES),
     )
 
 
@@ -567,6 +601,7 @@ def _own_status_was_not_asked(associate: _Branch) -> CoveredEntityDecision:
         associate.rationale
         + " Whether you yourself provide care and bill insurers was not asked, "
         "so covered-entity status is unresolved.",
+        (*associate.clauses, *_OWN_CLAUSES),
     )
 
 
@@ -591,6 +626,7 @@ def _nothing_was_asked() -> CoveredEntityDecision:
         "The intake has not asked who your customers are, whether you provide "
         "care, or whether you bill insurers. There is not enough to determine "
         "covered-entity or business-associate status.",
+        (*_OWN_CLAUSES, *_ASSOCIATE_CLAUSES),
     )
 
 
@@ -603,6 +639,7 @@ def _decided(status: CoveredEntityStatus, branch: _Branch) -> CoveredEntityDecis
             derived_from=ordered(branch.paths),
         ),
         rationale=branch.rationale,
+        clauses=_clause_ids(status, branch.clauses),
     )
 
 
@@ -611,6 +648,7 @@ def _ambiguous(
     paths: tuple[str, ...],
     questions: tuple[str, ...],
     rationale: str,
+    clauses: Iterable[str],
 ) -> CoveredEntityDecision:
     if not rationale.strip():
         raise DeterminationError(f"'{cause}' has no rationale")
@@ -622,7 +660,20 @@ def _ambiguous(
             unresolved_questions=questions,
         ),
         rationale=rationale,
+        clauses=_clause_ids(cause, clauses),
     )
+
+
+def _clause_ids(outcome: str, clauses: Iterable[str]) -> tuple[str, ...]:
+    """Deduplicated, in `_CLAUSE_ORDER`. Every outcome rests on at least one clause."""
+
+    wanted = set(clauses)
+    unknown = wanted - set(_CLAUSE_ORDER)
+    if unknown:
+        raise DeterminationError(f"'{outcome}' cites clauses outside the router set: {sorted(unknown)}")
+    if not wanted:
+        raise DeterminationError(f"'{outcome}' cites no clause")
+    return tuple(clause for clause in _CLAUSE_ORDER if clause in wanted)
 
 
 def _bool_fact(situation: HipaaSituation, path: str) -> _Fact:

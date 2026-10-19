@@ -43,3 +43,7 @@ None open. Resolved during the session:
 1. **G-03 does not record `receives_clinical_information`.** "Handle the clinic's patient data" does not say whether it is clinical. Decide the value, or decide how the Router treats `not_asked` on this field.
 2. **Phase 3:** how the Router reads `receives_clinical_information`, including `not_asked`.
 3. **Phase 4 check:** every non-HIPAA framework is `not_assessed`, but FTC Act §5 holds on both branches. The ambiguous cases' component 4 must not imply that nothing applies if the founder is not a business associate.
+
+## Follow-up 2026-10-19
+
+G-04 relabelled to business associate. The 2026-10-17 disagreement is reversed: appointment data linked to a named person is PHI under 45 CFR 160.103. See `reports/g-04_phi.md`. The table above is the Gate G snapshot and is not rewritten.

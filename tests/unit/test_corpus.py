@@ -28,6 +28,8 @@ DEMO_CLAUSE_IDS = frozenset(
         "45-CFR-160.103-def-covered-entity",
         "45-CFR-160.103-def-health-care-provider",
         "45-CFR-160.103-def-health-plan",
+        "45-CFR-160.103-def-health-information",
+        "45-CFR-160.103-def-individually-identifiable-health-information",
         "45-CFR-160.103-def-protected-health-information",
         "45-CFR-160.103-def-electronic-protected-health-information",
         "45-CFR-160.103-def-transaction",

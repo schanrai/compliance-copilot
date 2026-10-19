@@ -25,6 +25,7 @@ The eCFR verbatim test still rebuilds clause text, headings, and labels. It igno
 
 - `electronic protected health information` (aliases `ePHI`, `electronic PHI`) is narrower than `protected health information`.
 - `protected health information` (alias `PHI`) is narrower than `individually identifiable health information` and `health data`.
+- `individually identifiable health information` is narrower than `health information` (added 2026-10-19 with the two missing 160.103 definitions).
 
 Check 5 follows that chain. A longer term hides a term inside it, so the fixture sentence's `electronic protected health information` is not also a use of `protected health information`.
 

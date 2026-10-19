@@ -1,9 +1,8 @@
 # Broadening lexicon (PRD §15.2).
 # narrower_than is allowed in two cases only: the 160.103 nest
-# (electronic protected health information is the electronic subset of
-# protected health information, and protected health information is
-# individually identifiable health information), and the known widening
-# "health data", which is not a defined HIPAA term.
+# (electronic protected health information ⊂ protected health information ⊂
+# individually identifiable health information ⊂ health information), and the
+# known widening "health data", which is not a defined HIPAA term.
 # No other hierarchy. No weaker_than. addressable/required is not a link.
 
 terms:
@@ -22,6 +21,10 @@ terms:
       - health data
 
   - term: individually identifiable health information
+    narrower_than:
+      - health information
+
+  - term: health information
 
   - term: health data
     note: Not a defined HIPAA term. The known widening of protected health information.

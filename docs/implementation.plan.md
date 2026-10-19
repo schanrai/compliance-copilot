@@ -80,7 +80,7 @@ Each phase ends at a **QA gate**: named checks that must pass before the next ph
 | G-01 | Software sold to clinics; creates and stores patient records, including clinical information, on their behalf; clinics bill insurance electronically; signed agreements | **Business associate.** The clinics bill insurers electronically, so they are covered entities. The company creates and stores clinical records for them, so it handles protected health information on their behalf. A signed agreement does not decide the status. HIPAA in scope; cited 164.312(b) | Diagram Example A. Clean *applies* |
 | G-02 | Consumer wellness app; sold direct; tracks symptoms and medications; user entry + wearable; no clinic contracts, no patient data received, bills no insurer | **Neither.** The company does not provide care and bills no insurer, so it is not a covered entity. Its customers are consumers and it receives no patient data, so it is not a business associate. HIPAA out of scope. HBNR is *not assessed* | Diagram Example B intake. Clean *does not apply*; demo moment 1 |
 | G-03 | Consumer wellness app; sold direct; tracks symptoms and medications; also contracts with a clinic to handle that clinic's patient data; the clinic bills insurance electronically; the company itself bills no insurer | **Business associate.** The clinic bills insurance electronically, so it is a covered entity, and the company handles that clinic's patient data. The company's consumer business, and the fact that it bills no insurer itself, do not make it a covered entity. HIPAA in scope; cited 164.312(b) | The one-answer flip from G-02. One founder answer fills four intake fields |
-| G-04 | Scheduling tool sold to clinics; clinics bill insurance electronically; names, appointment times, provider identity; no clinical notes; contract unseen | **Ambiguous, `contested_question`.** The clinics are covered entities. The facts are known, and whether names, appointment times, and provider identity are protected health information is not settled. The unseen contract is not the cause. HIPAA unresolved; no cited requirement | PRD §9.1 worked example |
+| G-04 | Scheduling tool sold to clinics; clinics bill insurance electronically; names, appointment times, provider identity; no clinical notes; contract unseen | **Business associate.** The clinics bill insurers electronically, so they are covered entities. Names, appointment times, and provider identity relate to the provision of health care to an identifiable person, so they are protected health information under 45 CFR 160.103. A diagnosis is not required. The unseen contract is not read. HIPAA in scope; cited 164.312(b) | Relabelled 2026-10-19. PRD §9.1 worked example logged in §21. Report: `reports/g-04_phi.md` |
 | G-05 | Clinic-facing tool; receives and stores the clinics' patient records, including clinical information; clinics' insurance billing `unknown_to_user` | **Ambiguous, `missing_fact`.** The company stores the clinics' clinical records. The only open fact is whether those clinics bill insurance electronically, and the founder does not know. HIPAA unresolved; no cited requirement | The clinic-billing answer alone is unknown, so only that rule can produce the ambiguity |
 | G-06 | Software sold to a health insurer; stores the insurer's member records | **Business associate.** A health plan is a covered entity by definition, so the clinic-billing question is not asked. Member records held by a health plan are protected health information, and the company stores them. HIPAA in scope; cited 164.312(b) | Health plan customers need no billing question |
 | G-07 | Sells to a company that handles patient data for clinics; the product stores that data, including clinical information; the company's contracts with the clinics are unseen | **Ambiguous, `requires_document_we_cannot_see`.** The company stores clinical data for its customer. Whether that customer is a business associate depends on the customer's contracts with the clinics. The founder is not a party to those contracts, and another intake question cannot settle it. HIPAA unresolved; no cited requirement | Subcontractor customer type |
@@ -208,7 +208,7 @@ compliance-copilot/
 
 | Source | Clauses | Why |
 |---|---|---|
-| 45 CFR 160.103 | Definitions: business associate (including the subcontractor wording), covered entity, health care provider, health plan, protected health information, electronic protected health information, transaction | The determination is built from these |
+| 45 CFR 160.103 | Definitions: business associate (including the subcontractor wording), covered entity, health care provider, health plan, health information, individually identifiable health information, protected health information, electronic protected health information, transaction | The determination is built from these. Health information and individually identifiable health information were added 2026-10-19 so the G-04 rationale can cite the identifiable-health-information test |
 | 45 CFR 164.306 | (c), (d) | Standards are mandatory; the Required/Addressable scheme. Drives rendering |
 | 45 CFR 164.312 | (a)(1) standard; (a)(2)(i) a *Required* spec; (a)(2)(iv) an *Addressable* spec; (b) standard | 164.312(b) is the cited requirement. The others give the validator all three clause-type/modality states |
 | 45 CFR 164.404 | (b) | Breach notification deadline — covered entity. Derived requirement source |
@@ -270,16 +270,17 @@ Gate 1 passed 2026-10-17 — `reports/phase-1_qa.md`. R2 verified as believed.
 
 **Decisions made while building (2026-10-18).** The reading of `receives_clinical_information`, including `not_asked`, was left to this phase (PRD §20, 2026-10-17).
 
-1. **Clinical information.** Read only after a covered-entity customer and received patient data are both established. Yes is cited. No is `contested_question` (scheduling details only). `not_asked` does not block, which is why G-03 and G-06 are business associates without the field. `skipped` and `unknown_to_user` are `missing_fact`, and they are not read as no.
+1. **Clinical information.** Read only after a covered-entity customer and received patient data are both established. It does not change the status. Yes and no are both cited, because the rationale explains each. `not_asked`, `skipped`, and `unknown_to_user` are left out of `derived_from`. Reversed 2026-10-19: no is no longer `contested_question` (see decision 11).
 2. **Signed agreements are not read.** A signed agreement does not decide status. The render says so when the intake recorded an answer.
 3. **One no rules out the founder's own covered-entity status.** Both `provides_care_directly` and `bills_insurers_electronically` must be yes. Billing alone is not enough. The false fields are the ones cited. Both `not_asked` means that branch was not considered.
 4. **The founder's own covered-entity status wins** when it applies. A settled business-associate result is not downgraded by an open question on the other branch: a determined result cannot carry an unresolved question.
-5. **Cause order, when more than one is present:** `missing_fact`, then `requires_document_we_cannot_see`, then `contested_question`. Unknown clinic billing therefore wins over scheduling-only data.
+5. **Cause order, when more than one is present:** `missing_fact`, then `requires_document_we_cannot_see`, then `contested_question`. Unknown clinic billing therefore wins before the identifiable-health-information test is applied. No golden case currently produces `contested_question` (PRD §21).
 6. **Health-plan customers do not read the clinic-billing field**, whatever state that field is in. A health plan also settles the customer side when clinic billing is open.
 7. **A subcontractor customer is `requires_document_we_cannot_see` only when no customer is a settled covered entity.** A settled covered entity in the same list is a business associate. Not receiving patient data rules the business-associate branch out before billing or the contract question is reached.
 8. **Employers are not covered entities,** and they are not read as group health plans. Clearinghouses, and a founder who is themselves a health plan, are not in the intake.
 9. **Billing through a billing company is not a router rule.** The unresolved question uses the intake wording: "either directly or through a billing company."
 10. **The clinic-billing question names the customer.** Founder-facing text asks whether the clinic you sell to bills insurers electronically. "Your clinic" was readable as the founder's own company, which is the other question.
+11. **Scheduling details received from a covered-entity clinic are protected health information** (2026-10-19). G-04 is a business associate. The rationale walks the 160.103 nest: health information → individually identifiable health information → protected health information. The prototype does not ask whether the product only transmits the data (the conduit exception); it treats received data as maintained. Report: `reports/g-04_phi.md`. PRD §20 and §21.
 
 ---
 
@@ -294,9 +295,11 @@ Gate 1 passed 2026-10-17 — `reports/phase-1_qa.md`. R2 verified as believed.
 4. Render both
 
 **QA gate 4**
-- [ ] Golden framework summaries match
-- [ ] Every ambiguous case has components 1–4 and 6; the counsel question is pasteable as written
-- [ ] *Unresolved* and *not assessed* render visibly differently
+- [x] Golden framework summaries match
+- [x] Every ambiguous case has components 1–4 and 6; the counsel question is pasteable as written
+- [x] *Unresolved* and *not assessed* render visibly differently
+
+Gate passed 2026-10-19 — `reports/phase-4_qa.md`. G-04 was relabelled the same day, so the ambiguous cases are now G-05 and G-07. Phase 6 stays cut. Phase 5 is next if the remaining time covers its 2 hours.
 
 ---
 
@@ -311,7 +314,7 @@ Gate 1 passed 2026-10-17 — `reports/phase-1_qa.md`. R2 verified as believed.
 4. Render as a user story: full clause text, *"Standard — compliance is mandatory (45 CFR 164.306(c))"*, never "Required"
 
 **QA gate 5**
-- [ ] G-01, G-03, G-08 produce the requirement; G-02 and ambiguous cases do not
+- [ ] G-01, G-03, G-04, G-06, and G-08 produce the requirement; G-02 and ambiguous cases do not
 - [ ] The trace chain runs intake → router → specialist and terminates at intake field paths
 
 ---

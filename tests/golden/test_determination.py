@@ -28,12 +28,19 @@ from compliance_copilot.models import (
     TraceStep,
 )
 from compliance_copilot.render.determination import determination_panel, intake_panel
-from compliance_copilot.router import determine, run_determination
+from compliance_copilot.corpus.loader import load_corpus
+from compliance_copilot.router import (
+    ROUTER_CLAUSE_IDS,
+    decision_clauses,
+    determine,
+    run_determination,
+)
 from compliance_copilot.router.determine import CoveredEntityDecision
 from compliance_copilot.router.paths import CUSTOMERS_BILL
 
 CASES = Path(__file__).parent / "cases"
 CASE_FILES = case_files(CASES)
+CORPUS = load_corpus()
 T0 = datetime(2026, 10, 18, 15, 0, tzinfo=UTC)
 HIPAA_FIELDS = (
     "customer_types",
@@ -73,6 +80,33 @@ def test_golden_determination_matches(
     assert determination.ambiguity_cause is case.expected.ambiguity_cause
     assert determination.derived_from == case.expected.derived_from
     _show_case(capsys, case.id, case.title, case.stated, decision)
+
+
+def test_every_router_clause_resolves_in_the_corpus() -> None:
+    for clause_id in ROUTER_CLAUSE_IDS:
+        assert CORPUS.clause(clause_id).id == clause_id
+
+
+@pytest.mark.parametrize("path", CASE_FILES, ids=[path.stem for path in CASE_FILES])
+def test_golden_determination_cites_corpus_clauses(path: Path) -> None:
+    decision = determine(load_golden_case(path).stated)
+
+    assert decision.clauses
+    assert [c.id for c in decision_clauses(decision, CORPUS)] == list(decision.clauses)
+
+
+def test_scheduling_details_are_judged_by_the_identifiable_health_information_test() -> None:
+    decision = determine(load_golden_case(CASES / "g-04.yaml").stated)
+    health_information = CORPUS.clause("45-CFR-160.103-def-health-information")
+    iihi = CORPUS.clause("45-CFR-160.103-def-individually-identifiable-health-information")
+    phi = CORPUS.clause("45-CFR-160.103-def-protected-health-information")
+
+    assert decision.clauses.index(health_information.id) < decision.clauses.index(iihi.id)
+    assert decision.clauses.index(iihi.id) < decision.clauses.index(phi.id)
+    assert "the provision of health care to an individual" in health_information.operative_terms
+    assert "the provision of health care to an individual" in iihi.operative_terms
+    assert "health information includes information that relates to the provision of health care" in decision.rationale
+    assert "the provision of health care to a person" in decision.rationale
 
 
 def test_one_founder_answer_flips_the_wellness_app_to_a_business_associate() -> None:
@@ -156,7 +190,7 @@ def _show_case(
     with capsys.disabled():
         review.print()
         review.print(intake_panel(stated, case_id=case_id, title=title))
-        review.print(determination_panel(stated, decision))
+        review.print(determination_panel(stated, decision, decision_clauses(decision, CORPUS)))
 
 
 def _text(case_name: str) -> str:
@@ -164,7 +198,9 @@ def _text(case_name: str) -> str:
     decision = determine(case.stated)
     console = Console(record=True, width=100, file=io.StringIO())
     console.print(intake_panel(case.stated, case_id=case.id, title=case.title))
-    console.print(determination_panel(case.stated, decision))
+    console.print(
+        determination_panel(case.stated, decision, decision_clauses(decision, CORPUS))
+    )
     plain = re.sub(r"[│╭╮╰╯─]", " ", console.export_text())
     return re.sub(r"\s+", " ", plain)
 
@@ -179,11 +215,17 @@ def test_determinations_print_the_status_and_the_reasoning() -> None:
     assert "45 CFR 160.103" in business_associate
     assert "was not used" in business_associate
 
-    unresolved = _text("g-04.yaml")
-    assert "Ambiguous" in unresolved
-    assert "genuinely contested question" in unresolved
-    assert "What would settle it" in unresolved
-    assert "not settled" in unresolved
+    scheduling = _text("g-04.yaml")
+    assert "Business associate" in scheduling
+    assert "health information includes information that relates to the provision of health care" in scheduling
+    assert "individually identifiable health information" in scheduling
+    assert "A diagnosis is not required" in scheduling
+    assert "not settled" not in scheduling
+    assert "What would settle it" not in scheduling
+    assert "Regulation this applied" in scheduling
+    assert "45-CFR-160.103-def-health-information" in scheduling
+    assert "45-CFR-160.103-def-individually-identifiable-health-information" in scheduling
+    assert "https://www.ecfr.gov/on/2026-10-15/title-45/section-160.103" in scheduling
 
     covered = _text("g-08.yaml")
     assert "Covered entity" in covered

@@ -18,6 +18,8 @@ frameworks:
       - {kind: definition, section: "160.103", term: Covered entity}
       - {kind: definition, section: "160.103", term: Health care provider}
       - {kind: definition, section: "160.103", term: Health plan}
+      - {kind: definition, section: "160.103", term: Health information}
+      - {kind: definition, section: "160.103", term: Individually identifiable health information}
       - {kind: definition, section: "160.103", term: Protected health information}
       - {kind: definition, section: "160.103", term: Electronic protected health information}
       - {kind: definition, section: "160.103", term: Transaction}

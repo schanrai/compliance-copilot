@@ -39,6 +39,10 @@ The versioner API works; no hand entry needed. It answers HTTP 406 to an uncompr
 
 - **Phase 2:** the 164.312 lead-in ("A covered entity or business associate must, in accordance with § 164.306:") is not part of any clause's text, as in the PRD §15.1 example. Who the obligation binds lives in that lead-in.
 - **Definition closure** (PRD §15, "clauses carry their definitions") was not followed, as the clause list required. Terms used but not stored include subcontractor, health care clearinghouse, individually identifiable health information, workforce, and organized health care arrangement.
+
+### Follow-up 2026-10-19
+
+`health information` and `individually identifiable health information` were ingested from the same 2026-10-15 160.103 snapshot so the G-04 rationale can cite them (`reports/g-04_phi.md`). The other definition-closure gaps above remain.
 - **Label reader limit:** Subpart D prints standards as "Standard—", not "Standard:". If 164.404(a) or 164.410(a) were ingested, they would read as unlabelled and load as null. Fix before ingesting any Subpart D standard.
 - **Phase 0b open issue 2** (the derived requirement has no cited breach requirement to point at) is still open, due before Phase 6.
 - **Not started:** operative terms, lexicon, implications, requirement prose. `operative_terms` and `implications` are empty on all 16 clauses.

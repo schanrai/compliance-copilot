@@ -166,22 +166,25 @@ def test_clinical_information_not_asked_does_not_block_a_business_associate() ->
     assert BILLS not in paths
 
 
-def test_scheduling_details_only_are_a_contested_question() -> None:
-    status, cause, paths = status_of(
+def test_scheduling_details_only_make_a_business_associate() -> None:
+    fields = dict(
         customer_types=answered((CustomerType.CLINICS,)),
         customers_bill_insurers_electronically=answered(True),
         receives_patient_data_from_others=answered(True),
         receives_clinical_information=answered(False),
     )
+    status, cause, paths = status_of(**fields)
+    decision = determine(facts(**fields))
 
-    assert (status, cause) == (Status.AMBIGUOUS, Cause.CONTESTED_QUESTION)
+    assert (status, cause) == (Status.BUSINESS_ASSOCIATE, None)
     assert paths == (CUSTOMERS, CUSTOMERS_BILL, RECEIVES, CLINICAL)
-    assert "not settled" in questions_of(
-        customer_types=answered((CustomerType.CLINICS,)),
-        customers_bill_insurers_electronically=answered(True),
-        receives_patient_data_from_others=answered(True),
-        receives_clinical_information=answered(False),
-    )[0]
+    assert "health information includes information that relates to the provision of health care" in decision.rationale
+    assert "individually identifiable health information" in decision.rationale
+    assert "A diagnosis is not required" in decision.rationale
+    assert decision.clauses.index("45-CFR-160.103-def-health-information") < decision.clauses.index(
+        "45-CFR-160.103-def-individually-identifiable-health-information"
+    )
+    assert "45-CFR-160.103-def-protected-health-information" in decision.clauses
 
 
 @pytest.mark.parametrize(
@@ -264,16 +267,8 @@ def test_unknown_clinic_billing_wins_over_scheduling_only_data() -> None:
     assert CLINICAL not in paths
 
 
-@pytest.mark.parametrize(
-    ("state", "fragment"),
-    [
-        (FieldState.UNKNOWN_TO_USER, "You don't know whether your product receives clinical"),
-        (FieldState.SKIPPED, "whether your product receives clinical information"),
-    ],
-)
-def test_an_open_clinical_fact_is_not_treated_as_scheduling_only(
-    state: FieldState, fragment: str
-) -> None:
+@pytest.mark.parametrize("state", [FieldState.UNKNOWN_TO_USER, FieldState.SKIPPED])
+def test_an_open_clinical_fact_does_not_block_a_business_associate(state: FieldState) -> None:
     fields = dict(
         customer_types=answered((CustomerType.CLINICS,)),
         customers_bill_insurers_electronically=answered(True),
@@ -282,11 +277,23 @@ def test_an_open_clinical_fact_is_not_treated_as_scheduling_only(
     )
 
     status, cause, paths = status_of(**fields)
-    assert (status, cause) == (Status.AMBIGUOUS, Cause.MISSING_FACT)
-    assert CLINICAL in paths
-    assert fragment in questions_of(**fields)[0]
-    if state is FieldState.SKIPPED:
-        assert "was skipped" in questions_of(**fields)[0]
+    assert (status, cause) == (Status.BUSINESS_ASSOCIATE, None)
+    assert CLINICAL not in paths
+    assert "scheduling details" not in determine(facts(**fields)).rationale
+
+
+@pytest.mark.parametrize("state", [FieldState.UNKNOWN_TO_USER, FieldState.SKIPPED])
+def test_an_open_clinical_fact_does_not_change_the_subcontractor_cause(
+    state: FieldState,
+) -> None:
+    status, cause, paths = status_of(
+        customer_types=answered((CustomerType.COMPANIES_HANDLING_PATIENT_DATA_FOR_PROVIDERS,)),
+        receives_patient_data_from_others=answered(True),
+        receives_clinical_information=gap(state),
+    )
+
+    assert (status, cause) == (Status.AMBIGUOUS, Cause.REQUIRES_DOCUMENT_WE_CANNOT_SEE)
+    assert CLINICAL not in paths
 
 
 def test_a_subcontractor_customer_needs_a_document_the_tool_cannot_see() -> None:

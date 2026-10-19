@@ -6,12 +6,15 @@ when the intake recorded one, is shown as unused.
 
 from __future__ import annotations
 
+from collections.abc import Sequence
+
 from rich.console import Group
 from rich.panel import Panel
 from rich.text import Text
 
 from compliance_copilot.models import (
     AmbiguityCause,
+    Clause,
     CoveredEntityStatus,
     CustomerType,
     Field,
@@ -20,6 +23,11 @@ from compliance_copilot.models import (
 )
 from compliance_copilot.router.determine import CoveredEntityDecision
 from compliance_copilot.router.paths import FIELD_LABELS, customer_phrase, field_at
+
+
+class RenderError(ValueError):
+    """The inputs to a panel do not describe the same determination."""
+
 
 _STATUS = {
     CoveredEntityStatus.COVERED_ENTITY: ("Covered entity", "green"),
@@ -112,9 +120,18 @@ def _customers_include_clinics(stated: StatedFacts) -> bool:
     )
 
 
-def determination_panel(stated: StatedFacts, decision: CoveredEntityDecision) -> Panel:
-    """The determination, the answers it used, and what would settle it."""
+def determination_panel(
+    stated: StatedFacts, decision: CoveredEntityDecision, clauses: Sequence[Clause]
+) -> Panel:
+    """The determination, the answers and clauses it used, and what would settle it.
 
+    `clauses` are the corpus clauses for `decision.clauses`, in that order.
+    """
+
+    if tuple(clause.id for clause in clauses) != decision.clauses:
+        raise RenderError(
+            f"clauses {[c.id for c in clauses]} do not match the decision's {list(decision.clauses)}"
+        )
     determination = decision.determination
     label, style = _STATUS[determination.value]
     body: list[Text] = [
@@ -126,6 +143,12 @@ def determination_panel(stated: StatedFacts, decision: CoveredEntityDecision) ->
     ]
     for path in determination.derived_from:
         body.append(Text(f"• {FIELD_LABELS[path]}: {_format_value(field_at(stated, path))}"))
+    body.extend([Text(""), Text("Regulation this applied", style="bold")])
+    for clause in clauses:
+        url = str(clause.source_url)
+        line = Text(f"• {clause.heading} ({clause.id}) ")
+        line.append(url, style=f"link {url}")
+        body.append(line)
     agreements = stated.hipaa_situation.has_signed_agreements_with_healthcare_orgs
     if agreements.state is not FieldState.NOT_ASKED:
         body.append(Text(""))

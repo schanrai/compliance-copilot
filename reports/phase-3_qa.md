@@ -18,7 +18,9 @@ The trace for each case starts at intake and stops at the router. An `unknown_to
 
 ## How the rules read the fields
 
-Recorded in `docs/implementation.plan.md` under Phase 3. The one that was left open: `receives_clinical_information` is read only once a covered-entity customer and received patient data are both established. Yes is cited. No is the contested protected-health-information question. `not_asked` does not block. `skipped` and `unknown_to_user` are missing facts.
+Recorded in `docs/implementation.plan.md` under Phase 3. The one that was left open: `receives_clinical_information` is read only once a covered-entity customer and received patient data are both established.
+
+**Updated 2026-10-19.** Yes and no are both cited. Neither is contested. `not_asked`, `skipped`, and `unknown_to_user` are left out of `derived_from`. G-04 is a business associate (`reports/g-04_phi.md`).
 
 A signed agreement is never an input. Billing through a billing company is not a separate rule; the unresolved question uses the intake wording.
 
