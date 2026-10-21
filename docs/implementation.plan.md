@@ -73,7 +73,7 @@ Each phase ends at a **QA gate**: named checks that must pass before the next ph
 
 **The user writes the golden-set cases and expected labels; Claude pressure-tests them.** The labels are a healthcare judgement.
 
-**Slots.** G-01 to G-08 are confirmed labels.
+**Slots.** G-01 to G-08 are confirmed labels. **G-09 to G-12 are specified, not wired** (PRD §21 item 19). `reports/cms_trees_golden_cases.md`.
 
 | ID | Scenario | Expected label | Why it's in |
 |---|---|---|---|
@@ -85,6 +85,10 @@ Each phase ends at a **QA gate**: named checks that must pass before the next ph
 | G-06 | Software sold to a health insurer; stores the insurer's member records | **Business associate.** A health plan is a covered entity by definition, so the clinic-billing question is not asked. Member records held by a health plan are protected health information, and the company stores them. HIPAA in scope; cited 164.312(b) | Health plan customers need no billing question |
 | G-07 | Sells to a company that handles patient data for clinics; the product stores that data, including clinical information; founder does not know whether those clinics bill insurers | **Ambiguous, `missing_fact`.** The company stores clinical data for a customer that handles patient data for providers. Whether those providers are covered entities depends on whether they bill insurers electronically, and the founder does not know. A contract with those providers does not decide the status. HIPAA unresolved; no cited requirement | Subcontractor customer type. Relabelled 2026-10-19; see `reports/g-07_missing_fact.md` |
 | G-08 | Founder's company provides care directly and bills insurers electronically | **Covered entity.** The company provides care and bills insurers electronically, so it is a provider transmitting health information in a covered transaction. Billing alone would not be enough. HIPAA in scope; cited 164.312(b) | The founder is the covered entity |
+| G-09 | Founder's company is a digital health plan (issuer / HMO); does not furnish care; does not "bill insurers" | **Covered entity** (proposed). A health plan is a CE by definition. Today's router would say *neither* | CMS health-plan tree. **Not wired** |
+| G-10 | Product converts clinic files to/from HIPAA standard transactions for another legal entity | **Covered entity** (proposed). Clearinghouse. Founder CE wins over BA. Today's router would say *business associate* | CMS clearinghouse tree. **Not wired** |
+| G-11 | Sold to employers; product runs the group health plan; plan has 50+ participants or is not self-administered | **Business associate** (proposed). The GHP is the CE. Today's router would say *neither* (employers never read as a plan) | CMS group-health-plan tree. **Not wired** |
+| G-12 | Same as G-11 except the plan is under 50 **and** self-administered | **Neither** (proposed). CMS exception. Same answer as today, wrong reason | Counter-case so G-11 does not over-include. **Not wired** |
 
 **Every case also asserts:** the four-category framework summary (all non-HIPAA frameworks *not assessed* in the prototype), `derived_from` field paths, and that every trace chain terminates at intake.
 
@@ -373,9 +377,9 @@ There is no Monday evening. The cited requirement ships from the template. Phase
 ### Phase 8 — Demo commands (Mon, before 5pm, 1h plus one rehearsal)
 
 **Tasks**
-1. `run <case>` for the named golden-set cases — at least `records-platform` (G-01), `wellness-app` (G-02), `scheduling-tool` (G-04)
-2. The flip as its own command (`run wellness-app --contracts-with-clinic`, or G-03 as a named run). No live file edits
-3. A demo script: order of runs, what to say at each, where the *not assessed* list makes the honesty point
+1. Named YAML runs until Phase 8 aliases exist. Live set: G-02 (neither), G-03 (flip to BA), G-04 (scheduling is PHI / BA), **G-05 (ambiguous, `missing_fact`)**. G-07 only if asked — same hole, one hop out
+2. The flip is G-02 then G-03. No live file edits
+3. If the CMS covered-entity chart comes up: care = provider; electronic health-plan billing = covered transaction; cash-pay ≠ HIPAA. Logged PRD §21 item 15. Do not rewrite the field in the demo
 
 **QA gate 8**
 - [ ] One rehearsal, start to finish, including the live `pytest` run, with no edits during it. It happens in the last 90 minutes before 5pm
@@ -396,9 +400,12 @@ There is no Monday evening. The cited requirement ships from the template. Phase
 
 ## 6. What the demo will say is next
 
-- Claude writing requirements (if Phase S didn't land)
-- Component 5 — specified; production method open (PRD §17.9)
-- HBNR and the *not covered* branch's obligations (diagram Example B)
+- Counsel review of the golden set (mentor, 2026-10-19: deck first, not another build)
+- Always-on FTC Act §5 story: ingest **one** `Clause` for 15 U.S.C. §45(a), template around the identifier — not a hardcoded string, not an FTC guidance corpus (PRD §20, 2026-10-20). **Not this week**
+- Phase 5 — 164.312(b) template on the HIPAA-in branch
+- The rest of the Security Rule corpus (164.302–318)
+- HBNR (16 CFR Part 318) as its own later ingest, HIPAA-out only
+- Component 5 beyond the privacy-policy item — production method still open (PRD §17.9)
 - State laws, SOC 2, PCI — v1 scope, not prototype
-- The full Security Rule corpus
-- Counsel review of the golden set
+- Claude writing requirements (Phase S), after the templates exist
+- CMS trees not walked: founder-as-plan, clearinghouse, employer-as-group-health-plan — intake fields + G-09–G-12 (`reports/cms_trees_golden_cases.md`, PRD §21 item 19). Confirm labels with counsel before wiring
